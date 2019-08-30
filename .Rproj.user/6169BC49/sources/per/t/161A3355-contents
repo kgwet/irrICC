@@ -1,0 +1,145 @@
+---
+title: "**Inter-Rater Reliability**"
+subtitle: "*Chance-corrected Agreement Coefficients / CAC*"
+author: "Kilem L. Gwet, Ph.D."
+date:  "`r format(Sys.time(), '%d %B %Y')`"
+abstract:
+  '*The primary goal of this interactive document is to provide a short and engaging introduction to the field of inter-rater reliability. An user-friendly inter-rater reliability calculator is embedded to this document and you are encouraged to experiment with it using your own numbers.*  '
+output: html_document
+runtime: shiny
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(stringr)
+library(irrCAC)
+library(formattable)
+```
+
+## Introduction
+
+This \color{red}{R Markdown document} is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. <r style="color:blue">this part of which is red!</r> fdfddf
+
+To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+
+## The Calculator
+
+You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot. 
+
+```{r eruptions, echo=FALSE}
+
+#----> UI  ----
+
+sidebarLayout(
+  sidebarPanel(width=5,
+    
+    fluidRow(
+      column(width=6,helpText("Choose # Categories")),
+      column(width=3,selectInput("qCateg", label = NULL, choices = c(2:4),selected = "2",width="3cm"))
+    ),
+    fluidRow(
+      uiOutput("custcateg2RC"),
+      textInput(inputId="ti.clabels2RC",label=NULL,value="",placeholder = "Categ1,Categ2"),
+      uiOutput("Categories"),
+      uiOutput("Ratings")
+    )
+  ), #End of sidebarPanel()
+  mainPanel(width=7,
+        uiOutput("titCoeff"), # print the title "INTER-RATER RELIABILITY COEFFICIENTS & ASSOCIATED PRECISION..."
+        br(),
+        tableOutput("gridOutUnwt")
+  ) #End of mainPanel(  
+)#sidebarLayout(
+
+
+#----------------------> SERVER  ----------------------------
+
+
+#- Compute unweighted coefficients
+coefficients2C.f <- function(wtmat.p,xratings){
+  coeffmat.p = kappa2.table(xratings,weights=wtmat.p)
+  coeffmat.p = rbind(coeffmat.p,gwet.ac1.table(xratings,weights=wtmat.p))
+  coeffmat.p = rbind(coeffmat.p,scott2.table(xratings,weights=wtmat.p))
+  coeffmat.p = rbind(coeffmat.p,krippen2.table(xratings,weights=wtmat.p))
+  coeffmat.p = rbind(coeffmat.p,bp2.table(xratings,weights=wtmat.p))
+  coeffmat.p = rbind(coeffmat.p,pa2.table(xratings,weights=wtmat.p))
+  colnames(coeffmat.p) <- c("method","coeff","stderr","conf.interv", "p.value")
+  return(coeffmat.p)
+}
+read.ratings <- function(q){
+  in.data <- matrix(sample(q,q^2,replace=TRUE),q)
+  diag(in.data) <- sample(q:(15*q),q,replace=TRUE)
+  for (k in 1:q){
+    for (l in 1:q){
+      in.data[k,l] <- as.numeric(input[[paste0('Cells2C',k,l)]])
+      if (is.na(in.data[k,l])) in.data[k,l] <- 0
+    }
+  }
+  return(in.data)
+}
+clabels <- reactive(clabels <- str_trim(unlist(strsplit(input$ti.clabels2RC,","))))
+output$custcateg2RC <- renderUI(HTML("Customize Category Labels <i>(Separated by Comma)</i>"))
+output$Categories <-renderUI( #display category labels in the first row
+  fluidRow(
+    column(1, helpText("")),
+    lapply(1:input$qCateg, function(j){
+      if (!is.na(clabels()[j])) column(width=1, helpText(substr(clabels()[j],1,6)),offset=1)
+      else column(width=1, helpText(paste0('Categ', j)),offset=1)
+    })
+  )
+)
+nkl.mat <- reactive({
+  q <- as.numeric(input$qCateg)
+  if (!is.null(input[[paste0('Cells2C',q,q)]])) read.ratings(q)
+  else{
+    init.mat<-matrix(sample(q,q^2,replace=TRUE),q)
+    diag(init.mat)<-sample(q:(15*q),q,replace=TRUE)
+    init.mat
+  } 
+})
+# display all ratings table cells and category labels of the first column
+output$Ratings <- renderUI(
+  lapply(1:input$qCateg, function(i) {
+    fluidRow(
+      if (!is.na(clabels()[i])) column(width=1, helpText(substr(clabels()[i],1,6)))
+      else column(width=1, helpText(paste0('Categ', i))),
+      lapply(1:input$qCateg, function(j) {
+        column(width=1, textInput(paste0("Cells2C",i,j), label = NULL,value = nkl.mat()[i,j]),
+               tags$style(type='text/css',paste0("#Cells2C",i,j," { width: 55px;text-align:center;}")),offset = 1)
+      })
+    )
+  })
+)
+# Read ratings from the contingency table
+coeff <- reactiveValues(kappa=0,ac1=0,pi=0,alpha=0,bp=0,pa=0)
+observe({
+  output$titCoeff <- renderUI(HTML("<b>Inter-rater reliability coefficients & precision measures</b>"))
+  q <- as.numeric(input$qCateg)
+  if (!is.null(input[[paste0('Cells2C',q,q)]])){
+      DF.Out2RC<-read.ratings(q)
+      DF.Unweighted2RC <- coefficients2C.f(identity.weights(1:isolate(input$qCateg)),DF.Out2RC)
+      DF.Unweighted2RC$coeff <- format(DF.Unweighted2RC$coeff,digits=3) 
+      DF.Unweighted2RC$stderr <- format(DF.Unweighted2RC$stderr,digits=2,nsmall=3)
+      coeff$kappa <-DF.Unweighted2RC$coeff[1];coeff$ac1 <-DF.Unweighted2RC$coeff[2];coeff$pi <-DF.Unweighted2RC$coeff[3]
+      coeff$alpha <-DF.Unweighted2RC$coeff[1];coeff$bp <-DF.Unweighted2RC$coeff[2];coeff$pa <-DF.Unweighted2RC$coeff[3]
+      colnames(DF.Unweighted2RC) <- c("Method","Coeff","StdErr","95% C.I","P-Value")
+      output$gridOutUnwt = renderTable(DF.Unweighted2RC,bordered = TRUE,spacing = 'xs',striped = TRUE)
+  } 
+})
+kappa <- reactive(coeff$kappa)
+gwet <- reactive(coeff$ac1)
+```
+
+Coehen's Kappa coefficient is $\kappa=$`r kappa` and Gwet $AC_1$ coefficient is $AC_1=$`r gwet`
+
+## Embedded Application
+
+It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
+
+Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
+
+You can also use the `shinyApp` function to define an application inline rather then in an external directory.
+
+In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
+
+
+# References

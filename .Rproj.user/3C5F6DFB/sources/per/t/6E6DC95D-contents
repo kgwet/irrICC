@@ -1,0 +1,73 @@
+#
+# This is a Shiny web application. You can run the application by clicking
+# the 'Run App' button above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
+
+library(shiny)
+library(shinyMatrix)
+
+m <- diag(5)
+cnames <- reactiveValues()
+cnames$cols<-1:5
+# colnames(m) <- 1:5
+#rownames(m) <- letters[1:5]
+fmatrix <- function(m,nb){
+  matrixInput(
+    inputId = paste0("matrix",nb),
+    value = m,
+    class = "numeric",
+    cols = list(
+      names = TRUE,
+      extend = TRUE,
+      editableNames = TRUE,
+      delta = 2
+    ),
+    rows = list(
+      names = TRUE,
+      extend = TRUE,
+      editableNames = TRUE,
+      delta = 1
+    ),
+    copy = TRUE,
+    paste = TRUE
+  )
+}
+
+
+ui <- fluidPage(
+  uiOutput("Ratings1"),
+  uiOutput("Ratings2"),
+  column(6, tableOutput("table"))
+  # shiny::tagList(
+  #   shiny::fluidPage(
+  #     shiny::titlePanel("Demonstration Matrix Input Field"),
+  #     fmatrix(m)
+  #   )
+  # )
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output, session) {
+
+  output$Ratings1 <-renderUI({
+    colnames(m)<-cnames$cols
+    rownames(m)<-cnames$cols
+    fmatrix(m,1)
+  })
+  output$Ratings2 <- renderUI({
+    cnames$col <-colnames(input$matrix1)
+    mm <- input$matrix1
+    # colnames(mm)<-cnames$cols
+    # rownames(mm)<-cnames$cols
+    fmatrix(mm,2)
+  })
+  observe(cnames$col <-colnames(input$matrix))
+  output$table <- renderTable(input$matrix1, rownames = TRUE)
+}
+
+# Run the application
+shinyApp(ui = ui, server = server)

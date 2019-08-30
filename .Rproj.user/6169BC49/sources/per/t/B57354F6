@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1565433489509.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "153312141",
+    "id" : "B57354F6",
+    "lastKnownWriteTime" : 1566641895,
+    "last_content_update" : 1566641895277,
+    "path" : "F:/CloudComputing/AgreeStatCloud/server.r",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "2066,35",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

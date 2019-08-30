@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1565385920459.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "630866407",
+    "id" : "6E6DC95D",
+    "lastKnownWriteTime" : 1565387123,
+    "last_content_update" : 1565387123222,
+    "path" : "D:/CloudComputing/Rpackages/shinyMatrix/appExtend/app.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "64,31",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

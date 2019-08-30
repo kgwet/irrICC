@@ -1,0 +1,46 @@
+#
+# This is a Shiny web application. You can run the application by clicking
+# the 'Run App' button above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
+
+library(shiny)
+library(shinyMatrix)
+
+m <- diag(5)
+# Application title
+# colnames(m) <- 1:3
+# rownames(m) <- letters[1:3]
+
+ui <- fluidPage(
+    tagList(
+      fluidPage(
+        titlePanel("Demonstration Matrix Input Field"),
+        fluidRow(
+          column(6, matrixInput(
+            inputId = "matrix",
+            value = m,
+            class = "numeric",
+            cols = list(
+              names = TRUE
+            ),
+            rows = list(
+              names = TRUE
+            )
+          )),
+          column(6, tableOutput("table"))
+        )
+      )
+    )
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output, session) {
+  output$table <- renderTable(input$matrix, rownames = TRUE)
+}
+
+# Run the application
+shinyApp(ui = ui, server = server)

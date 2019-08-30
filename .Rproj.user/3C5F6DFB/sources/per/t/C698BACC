@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1566583493947.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "703969616",
+    "id" : "C698BACC",
+    "lastKnownWriteTime" : 1566584472,
+    "last_content_update" : 1566584472665,
+    "path" : "D:/CloudComputing/Rpackages/irrCAC/R/agree.coeff2.r",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "347,35",
+        "scrollLine" : "323"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 9,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

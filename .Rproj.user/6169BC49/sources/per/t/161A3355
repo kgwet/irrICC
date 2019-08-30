@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1566761060061.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4145364685",
+    "id" : "161A3355",
+    "lastKnownWriteTime" : 1566762533,
+    "last_content_update" : 1566762534192,
+    "path" : "F:/CloudComputing/ShinyMarkdown/inter-rater reliability.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "7,21",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
