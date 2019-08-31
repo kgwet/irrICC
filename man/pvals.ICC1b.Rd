@@ -11,7 +11,7 @@ pvals.ICC1b(ratings, gam.zero = 0)
 if a subject was assigned multiple ratings) and each of the remaining columns is associated with a particular rater and contains its
 numeric ratings.}
 
-\item{gam.zero.}{This is an optional parameter that represents a vector containing an arbitrary number of null values between 0 and 1
+\item{gam.zero}{This is an optional parameter that represents a vector containing an arbitrary number of null values between 0 and 1
 for which a p-value will be calculated. If left unspecified, its default value will be 0.}
 }
 \value{

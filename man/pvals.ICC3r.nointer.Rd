@@ -7,11 +7,11 @@
 pvals.ICC3r.nointer(dfra, rho.zero = 0)
 }
 \arguments{
-\item{ratings.}{This is a data frame containing 3 columns or more. The first column contains subject numbers (there could be duplicates
+\item{dfra}{This is a data frame containing 3 columns or more. The first column contains subject numbers (there could be duplicates
 if a subject was assigned multiple ratings) and each of the remaining columns is associated with a particular rater and contains its
 numeric ratings.}
 
-\item{rho.zero.}{This is an optional parameter that represents a vector containing an arbitrary number of null values between 0 and 1
+\item{rho.zero}{This is an optional parameter that represents a vector containing an arbitrary number of null values between 0 and 1
 for which a p-value will be calculated. If not specified then its default value will be 0.}
 }
 \value{

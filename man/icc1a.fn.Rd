@@ -19,7 +19,7 @@ number of ratings per subjects. 8. M: the total number of ratings for all subjec
 }
 \description{
 This ICC is associated with the one-factor ANOVA model where each subject could be rated by a different group of raters. This ICC represents
-a measure of inter-rater reliability coefficient among all raters involved in the experiment.
+a measure of inter-rater reliability among all raters involved in the experiment.
 }
 \references{
 Gwet, K.L. (2014): \emph{Handbook of Inter-Rater Reliability - 4th ed.} - Equation #8.1.3, chapter 8. Advanced Analytics, LLC.

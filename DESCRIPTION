@@ -1,18 +1,22 @@
 Package: irrICC
 Type: Package
-Title: Using Intraclass Correlation Coeffficients to compute inter-rater and intra-rater reliability coefficients based on quantitative ratings   
+Title: Intraclass Correlations for Quantifying Inter-Rater Reliability   
 Version: 1.0
 Author: Kilem L. Gwet, Ph.D.
 Maintainer: Kilem L. Gwet <gwet@agreestat.com>
-Description: This package contains a series of R functins for calculating various inter-rater and intra-rater reliability
-  coefficients under the assumption the raters produced quantitative ratings. Most of the statistical procedures implemented
+Description: A series of R functions are made available for calculating various intraclass correlation coefficients used to quantify 
+  inter-rater and intra-rater reliability.  The assumption here is that the raters produced quantitative ratings. Most of the statistical procedures implemented
   in this package are described in details in Gwet, K.L. (2014): Handbook of Inter-Rater Reliability - 4th ed. 
   Advanced Analytics, LLC.
 License: GPL (>=2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
+Imports:
+    stats
 Suggests: 
+    scales,
+    plyr,
     knitr,
     rmarkdown
 VignetteBuilder: knitr

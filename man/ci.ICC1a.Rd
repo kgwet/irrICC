@@ -11,7 +11,7 @@ ci.ICC1a(ratings, conflev = 0.95)
 if a subject was assigned multiple ratings) and each of the remaining columns is associated with a particular rater and contains its
 numeric ratings.}
 
-\item{conflev.}{This is the optional confidence level associated with the confidence interval. If not specified, the default value
+\item{conflev}{This is the optional confidence level associated with the confidence interval. If not specified, the default value
 will be 0.95, which is the most commonly-used valuee in the literature.}
 }
 \value{

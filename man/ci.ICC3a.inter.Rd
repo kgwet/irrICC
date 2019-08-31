@@ -7,11 +7,11 @@
 ci.ICC3a.inter(dfra, conflev = 0.95)
 }
 \arguments{
-\item{dfra.}{This is a data frame containing 3 columns or more.  The first column contains subject numbers (there could be duplicates
+\item{dfra}{This is a data frame containing 3 columns or more.  The first column contains subject numbers (there could be duplicates
 if a subject was assigned multiple ratings) and each of the remaining columns is associated with a particular rater and contains its
 numeric ratings.}
 
-\item{conflev.}{This is the optional confidence level associated with the confidence interval. If not specified, the default value
+\item{conflev}{This is the optional confidence level associated with the confidence interval. If not specified, the default value
 will be 0.95, which is the most commonly-used valuee in the literature.}
 }
 \value{
