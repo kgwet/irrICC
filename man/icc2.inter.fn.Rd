@@ -23,6 +23,14 @@ This function returns a list containing the following 12 values:
 This functions computes 2 ICC estimates for the inter-rater reliability and intra-rater reliability coefficients. It
 requires some subjects to have multiple ratings and assumes the ANOVA model was specified with interaction.
 }
+\examples{
+#iccdata1 is a small dataset that comes with the package. Use it as follows:
+library(irrICC)
+iccdata1 #see what the iccdata1 dataset looks like
+icc2.inter.fn(iccdata1)
+coeff <- icc2.inter.fn(iccdata1)$icc2r #this only gives you the ICC coefficient
+coeff
+}
 \references{
 Gwet, K.L. (2014): \emph{Handbook of Inter-Rater Reliability - 4th ed.} - Equation #9.2.3 of chapter 9, pages 231-232
 (for the inter-rater reliability ICC(2,1)), and Equation #9.2.10 of chapter 9, page 236 (for the intra-rater reliability),

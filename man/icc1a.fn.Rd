@@ -21,6 +21,14 @@ number of ratings per subjects. 8. M: the total number of ratings for all subjec
 This ICC is associated with the one-factor ANOVA model where each subject could be rated by a different group of raters. This ICC represents
 a measure of inter-rater reliability among all raters involved in the experiment.
 }
+\examples{
+#iccdata1 is a small dataset that comes with the package. Use it as follows:
+library(irrICC)
+iccdata1 #see what the iccdata1 dataset looks like
+icc1a.fn(iccdata1)
+coeff <- icc1a.fn(iccdata1)$icc1a
+coeff
+}
 \references{
 Gwet, K.L. (2014): \emph{Handbook of Inter-Rater Reliability - 4th ed.} - Equation #8.1.3, chapter 8. Advanced Analytics, LLC.
 }

@@ -11,6 +11,10 @@ library(stringr)
 library(tidyverse)
 library(readxl)
 shinyUI(fluidPage(
+  fluidRow(column(width=1,actionLink("login",width='1cm',label = HTML("Login"))),
+           column(width=1,actionLink("register",width='1cm',label = HTML("Register")),offset=0),
+           column(width=1,uiOutput("ui.account"),offset=0)
+  ),
   h1("AgreeStat 2019.01 ",
      style = "font-family: 'lobster',cursive;
      font-weight: 700;
@@ -37,7 +41,7 @@ navbarPage("",
               column(width=5,
                   selectInput("qCateg",
                       label = NULL,
-                      choices = c(2:12),
+                      choices = c(2:10),
                       selected = "2",width="3cm"
                   )
               ),

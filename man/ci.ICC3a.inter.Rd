@@ -22,6 +22,14 @@ This function computes the confidence interval of the Intraclass Correlation Coe
 model (Model 3) with subject-rater interaction. ICCa(3,1) is formulated as a measure of intra-rater reliability coefficient. This
 function computes the lower and upper confidence bounds of the confidence interval.
 }
+\examples{
+#iccdata1 is a small dataset that comes with the package. Use it as follows:
+library(irrICC)
+iccdata1 #see what the iccdata1 dataset looks like
+ci.ICC3a.inter(iccdata1)
+ci.ICC3a.inter(iccdata1)$ucb #this only gives the upper confidence bound
+ci.ICC3a.inter(iccdata1,0.90) #this gives you the 90\% confidence interval
+}
 \references{
 Gwet, K.L. (2014): \emph{Handbook of Inter-Rater Reliability - 4th ed.} chapter 10, section 10.3.2, equations
 10.3.10 and 10.3.11. Advanced Analytics, LLC.

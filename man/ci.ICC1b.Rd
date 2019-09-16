@@ -21,6 +21,12 @@ This function returns a vector containing the following the lower confidence (lc
 This function computes the lower and upper confidence bounds associated with the ICC under the one-factor ANOVA model
 where each rater may rate a different group of subjects.
 }
+\examples{
+#iccdata1 is a small dataset that comes with the package. Use it as follows:
+library(irrICC)
+iccdata1 #see what the iccdata3 dataset looks like
+ci.ICC1b(iccdata1)
+}
 \references{
 Gwet, K.L. (2014): \emph{Handbook of Inter-Rater Reliability - 4th ed.} chapter 8, section 8.3.4, equations
 8.3.5 and 8.3.6. Advanced Analytics, LLC.

@@ -18,6 +18,12 @@ This function returns a vector containing 6 p-values associated with the 6 null 
 This function computes the p-value associated with the Intraclass Correlation Coefficient (ICC) under the one-factor ANOVA
 model where each subject may be rated by a different group of raters.
 }
+\examples{
+#iccdata1 is a small dataset that comes with the package. Use it as follows:
+library(irrICC)
+iccdata1 #see what the iccdata1 dataset looks like
+pval.ICC1a(iccdata1)
+}
 \references{
 Gwet, K.L. (2014): \emph{Handbook of Inter-Rater Reliability - 4th ed.} chapter 8, section 8.3.2, equation
 8.3.4. Advanced Analytics, LLC.

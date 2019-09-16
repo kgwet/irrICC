@@ -30,6 +30,14 @@ This function computes 2 Intraclass Correlation Coefficients (ICC) ICC(2,1) and 
 (Model 2) without any subject-rater interaction. ICC(2,1) is formulated as a measure of inter-rater reliability and ICCa(2,1)
 as a measure of intra-rater reliability.
 }
+\examples{
+#iccdata1 is a small dataset that comes with the package. Use it as follows:
+library(irrICC)
+iccdata1 #see what the iccdata1 dataset looks like
+icc2.nointer.fn(iccdata1)
+coeff <- icc2.nointer.fn(iccdata1)$icc2r #this only gives you the ICC coefficient
+coeff
+}
 \references{
 Gwet, K.L. (2014): \emph{Handbook of Inter-Rater Reliability - 4th ed.} - Equations 9.5.2 and 9.5.3 of chapter 9, page 258.
 Advanced Analytics, LLC.

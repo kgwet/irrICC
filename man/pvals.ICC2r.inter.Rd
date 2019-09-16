@@ -22,6 +22,12 @@ This function computes p-values for the Intraclass Correlation Coefficients (ICC
 under the random factorial ANOVA model (Model 2) with subject-rater interaction. The output is vector of p-values, one for each of the
 null values specified in the optional rho.zero parameter, whose default value is 0.
 }
+\examples{
+#iccdata1 is a small dataset that comes with the package. Use it as follows:
+library(irrICC)
+iccdata1 #see what the iccdata1 dataset looks like
+pvals.ICC2r.inter(iccdata1,c(0.15,0.20,0.25))
+}
 \references{
 Gwet, K.L. (2014): \emph{Handbook of Inter-Rater Reliability - 4th ed.} chapter 9, section 9.3.1 Advanced Analytics, LLC.
 }

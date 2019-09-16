@@ -1,24 +1,24 @@
 {
     "collab_server" : "",
     "contents" : "",
-    "created" : 1565433493567.000,
+    "created" : 1568622317613.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "2082994890",
-    "id" : "73F92A8F",
-    "lastKnownWriteTime" : 1566642509,
-    "last_content_update" : 1566642509217,
-    "path" : "F:/CloudComputing/AgreeStatCloud/ui.r",
+    "hash" : "2857356567",
+    "id" : "1F21F046",
+    "lastKnownWriteTime" : 1568588559,
+    "last_content_update" : 1568588559,
+    "path" : "H:/CloudComputing/AgreeStatCloud/server.r",
     "project_path" : null,
     "properties" : {
-        "cursorPosition" : "24,17",
+        "cursorPosition" : "8,17",
         "scrollLine" : "0"
     },
     "read_only" : false,
     "read_only_alternatives" : [
     ],
-    "relative_order" : 6,
+    "relative_order" : 2,
     "source_on_save" : false,
     "source_window" : "",
     "type" : "r_source"

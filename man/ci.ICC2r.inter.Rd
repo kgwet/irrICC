@@ -21,6 +21,12 @@ This function returns a vector containing the lower confidence (lcb) and the upp
 This function computes the confidence interval associated with the Intraclass Correlation Coefficient (ICC) used as a measure
 of inter-rater reliability, under the Random Factorial ANOVA model with interaction. It produces the lower and upper confidence bounds.
 }
+\examples{
+#iccdata1 is a small dataset that comes with the package. Use it as follows:
+library(irrICC)
+iccdata1 #see what the iccdata1 dataset looks like
+ci.ICC2r.inter(iccdata1)
+}
 \references{
 Gwet, K.L. (2014): \emph{Handbook of Inter-Rater Reliability - 4th ed.} chapter 9, section 9.3.1, equations
 9.3.1 and 9.3.2. Advanced Analytics, LLC.

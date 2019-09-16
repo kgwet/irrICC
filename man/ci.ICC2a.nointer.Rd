@@ -22,6 +22,12 @@ This function computes the confidence interval associated with the Intraclass Co
 of Intra-Rater Reliability under the random factorial ANOVA model (Model 2) without subject-rater interaction. This function produces
 the lower and upper confidence bounds.
 }
+\examples{
+#iccdata1 is a small dataset that comes with the package. Use it as follows:
+library(irrICC)
+iccdata1 #see what the iccdata1 dataset looks like
+ci.ICC2a.nointer(iccdata1)
+}
 \references{
 Gwet, K.L. (2014): \emph{Handbook of Inter-Rater Reliability - 4th ed.} chapter 9, section 9.5.1, equations
 9.5.11 and 9.5.12,page 259. Advanced Analytics, LLC.

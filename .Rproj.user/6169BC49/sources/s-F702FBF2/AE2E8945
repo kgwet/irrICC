@@ -1,19 +1,17 @@
 {
     "collab_server" : "",
     "contents" : "",
-    "created" : 1565682469497.000,
+    "created" : 1568622318916.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "2116533683",
-    "id" : "5F62DE72",
-    "lastKnownWriteTime" : 1556539279,
-    "last_content_update" : 1556539279,
-    "path" : "F:/CloudComputing/Shiny Tutorial/export shiny output to PDF file.r",
+    "hash" : "1327449609",
+    "id" : "AE2E8945",
+    "lastKnownWriteTime" : 1568407304,
+    "last_content_update" : 1568407304,
+    "path" : "H:/CloudComputing/AgreeStatCloud/ui.r",
     "project_path" : null,
     "properties" : {
-        "cursorPosition" : "24,18",
-        "scrollLine" : "0"
     },
     "read_only" : false,
     "read_only_alternatives" : [

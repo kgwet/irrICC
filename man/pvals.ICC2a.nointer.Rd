@@ -16,6 +16,11 @@ for which a p-value will be calculated. If not specified then its default value 
 }
 \value{
 This function returns a vector containing p-values associated with the null values specified in the parameter rho.zero.
+#iccdata1 is a small dataset that comes with the package. Use it as follows:
+library(irrICC)
+iccdata1 #see what the iccdata1 dataset looks like
+pvals.ICC2a.nointer(iccdata1)
+pvals.ICC2a.nointer(iccdata1,seq(0.2,0.5,0.05))
 }
 \description{
 This function can compute several p-values associated with the Intraclass Correlation Coefficient (ICC) used to quantify intra-rater

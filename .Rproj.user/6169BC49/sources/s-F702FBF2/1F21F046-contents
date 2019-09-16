@@ -13,11 +13,15 @@ library(gtable)
 #install_github("kgwet/irrCAC")
 library(irrCAC)
 library(irrICC)
+pacman::p_load(glue,gmailr,RSQLite,DescTools)
 
 ###source_url("https://raw.github.com/kgwet/irrCAC/R/bingSearchXScraper.R")
 ###install_github("kgwet/irrCAC",force=TRUE)
 
 options(shiny.maxRequestSize = 9*1024^2)
+
+countrycodes <- read.csv("./data/countrycodes.csv",header = TRUE)
+user.data <- "H:/CloudComputing/AgreeStatCloud/databases/agreestat.db"
 
 # DF = as.data.frame(matrix(0,10,9))
 # colnames(DF)=LETTERS[1:9]
@@ -25,22 +29,157 @@ options(shiny.maxRequestSize = 9*1024^2)
 coeff.cols <- c("method","coeff","stderr","conf.interv", "p.value")
 coeff.names <- c("Kappa","AC1","Scott","Alpha","B-P","Percent")
 
+#add new record 'xrecord' to table xtable' of the 'xdatabase' database 
+saveData <- function(xdatabase,xtable,xrecord) {
+  # Connect to the database
+  db <- dbConnect(SQLite(), xdatabase)
+  # Construct the update query by looping over the data fields
+  query <- sprintf(
+    "INSERT INTO %s (%s) VALUES ('%s')",
+    xtable, 
+    paste(names(xrecord), collapse = ", "),
+    paste(xrecord, collapse = "', '")
+  )
+  # Submit the update query and disconnect
+  dbExecute(db, query)
+  dbDisconnect(db)
+}
+
+#create an R data frame from table xtable' of the 'xdatabase' database 
+loadData <- function(xdatabase,xtable) {
+  # Connect to the database
+  db <- dbConnect(SQLite(), xdatabase)
+  # Construct the fetching query
+  query <- sprintf("SELECT * FROM %s", xtable)
+  # Submit the fetch query and disconnect
+  data <- dbGetQuery(db, query)
+  dbDisconnect(db)
+  data
+}
+
+#This function generates 8-character passwords for the trial version of AgreeStat
+passgen_fn <- function() {
+  poolchars <- c(0:9,letters,LETTERS,c())
+  passwd <- c(sample(c(letters,LETTERS),2),
+              sample(c(0:9,"@","#","$","%","&","!","*"),3),
+              sample(poolchars,3))
+  passwd <- paste(passwd,collapse="")
+  return(passwd)
+}
+
+#This function creates a customer ID in the form of a 20-character string
+customid_fn <- function() {
+  rand5 <- sample(0:9,5,replace = TRUE)
+  rd5chr <- sapply(1:5,function(x) paste0(rand5[x]))
+  rd5chr <- paste(rd5chr,collapse="")
+  today <- Sys.Date()
+  custid <- paste0("A",rd5chr,"D",format(Sys.time(), "%Y%m%dT%H%M"))
+  return(custid)
+}
+
 
 shinyServer(
   function(input, output, session) {
+    
+    #Log-in form
+    loginModal <- function(failed = FALSE) {
+      modalDialog(size="s",
+        textInput("login.txt", "Username/Email",width="5cm",
+                  placeholder = 'Your email'
+        ),
+        textInput("passwd.txt", "Password",width="5cm",
+                  placeholder = 'Your password'
+        ),
+        actionLink("forgot",label="Forgot Password"),
+        if (failed) div(tags$b("Unrecognized username or password", style = "color: red;")),
+        footer = tagList(
+          # actionLink("register",label="Register"),HTML("&nbsp;&nbsp;"),
+          modalButton("Cancel"),
+          actionButton("ok", "OK")
+        )
+      )
+    }
+    
+    #Log-in form
+    registerModal <- function(failed = FALSE) {
+      modalDialog(size="s",
+                  textInput("name.txt", "First & Last Name ",width="6cm",
+                            placeholder = 'Your name'
+                  ),
+                  textInput("email.txt", "Email ",width="6cm",
+                            placeholder = 'Your email'
+                  ),
+                  selectizeInput("ctrycode", "Country Code:",choices=NULL,width="6cm"),
+                  textInput("telephone", "Telephone ",width="6cm",
+                            placeholder = 'Your telephone number'
+                  ),
+                  if (failed) div(tags$b("Unrecognized username or password", style = "color: red;")),
+                  footer = tagList(
+                    modalButton("Cancel"),
+                    actionButton("ok.register", "Register")
+                  )
+      )
+    }
+    
+    # Show modal when button is clicked.
+    observeEvent(input$login, {
+      showModal(loginModal())
+    })
+    observeEvent(input$register, {
+      updateSelectInput(session,"ctrycode",label="Country Code",choices=countrycodes$country)
+      showModal(registerModal())
+    })
+    
+    observeEvent(input$ok.register,{
+      id.cus <- customid_fn()
+      country <- sub(" [+].*","",input$ctrycode)
+      phone <- paste0(sub(".*[+]","",input$ctrycode),input$telephone)
+      email <- input$email.txt
+      name <- input$name.txt
+      today <- format(Sys.Date(), "%Y.%m.%d")
+      pass.wd <- passgen_fn()
+      recdata <- c(customid=id.cus,name=name,email=email,country=country,phone=phone,lictype="trial",licdate="",
+                   password=pass.wd,regisdate=today,license="XXX",inuse=TRUE)
+      print(recdata)
+      saveData(user.data,"customers",recdata)
+      
+      #send email with password to user
+      #gm_auth_configure(path = "AgreeStatR.json")
+      #gm_auth(cache = ".secret")
+      passwd_msg = glue("Dear {name},
+                        
+        Thank you for registering to use AgreeStat.  Here is your password: {pass.wd}.
+                        
+        AgreeStat Support,
+        E-mail: support@agreestat.com."
+      )
+      my_email_message <- gm_mime() %>%
+        gm_to(email) %>%
+        gm_from("agreestat@gmail.com") %>%
+        gm_subject("Your log in password") %>% 
+        gm_text_body((passwd_msg))
+      gm_send_message(my_email_message) 
+    })
+    
+    
+    
+    #Create reactive vector indicating the CAC coefficients selected by users and that must be calculated
     coeff.select2C <- reactive(c(input$chkkappa2RC,input$chkac12RC,input$chkpi2RC,input$chkalpha2RC,input$chkkbp2RC,input$chkpct2RC))
     coeff.select2R <- reactive(c(input$chkkappa2RR,input$chkac12RR,input$chkpi2RR,input$chkalpha2RR,input$chkkbp2RR,input$chkpct2RR))
     coeff.select3R <- reactive(c(input$chkkappa3RR,input$chkac13RR,input$chkpi3RR,input$chkalpha3RR,input$chkkbp3RR,input$chkpct3RR))
     coeff.select3D <- reactive(c(input$chkkappa3RD,input$chkac13RD,input$chkpi3RD,input$chkalpha3RD,input$chkkbp3RD,input$chkpct3RD))
 
-    format.estim <- function(df,cl){
-      df$coeff <- format(df$coeff,digits=3)
-      df$stderr <- formatC(df$stderr,format="f",digits=3)
-      df$p.value <- formatC(df$p.value,format="e",digits=3)
-      colnames(df) <- c("Method", "Coeff", "StdErr",paste0(cl,"% C.I."),"P-Value")
-    }
-
-    # The benchmark.table() function creates the benchmark table
+    #-----------------------------------------#
+    #                                         #
+    #     Treatment of Contingency Tables     #
+    #     ===============================     #
+    #                                         #
+    #-----------------------------------------#
+    
+    
+    #       The benchmark.table() function creates the benchmark table
+    #       ----------------------------------------------------------
+    
     benchmark.table <- function(coeffs.table,CAC.type){
       coeff.est <- as.numeric(as.vector(unlist(coeffs.table[2])))
       stderr.est <- as.numeric(as.vector(unlist(coeffs.table[3])))
@@ -101,54 +240,18 @@ shinyServer(
       return(DFR)
     } # End of function benchmark.table
 
-
-    bench.request <- reactiveValues(BR=FALSE) # This reactive object stores the reactive value bench.request$BR that will become TRUE as soon as the first benchmarking is placed.
-                                              # This is needed to improve the app's functionality.
-    bench.request.w <- reactiveValues(WBR=FALSE) # Equivalent of bench.request for weighted coefficients
-
-    #  -------------------------------------------------------------------
-    #- Data capture for contingency table analysis / data supplied by user
-    #  -------------------------------------------------------------------
-
-    # reset the external file used to import data into the contingency table
-    observeEvent(input$Reset2Cont,{
-      reset("f2RCont")
-    })
-
-    # Importing external data into the contingency table
-    dfra <- reactiveValues(data=NULL)
-    cnames2RC <- reactiveValues(cols=NULL)
-    output$gridFile2RC = renderRHandsontable({
-        inFile <- input$f2RCont
-        if (is.null(inFile)) {return(NULL)}
-        if (isolate(input$ftype2RC)=='csv') DF <- read.csv(inFile$datapath, header = FALSE,sep = input$sep, quote = input$quote)
-        else DF <- read_excel(inFile$datapath)
-        dfra$data <- DF
-        cnames2RC$cols <- colnames(DF)
-        updateTextInput(session, inputId="ti.clabels2RC", label = NULL,
-                        value = colnames(DF)[1:input$qCateg])
-        rhandsontable(DF, selectCallback = TRUE,width=350,height = 450,useTypes = FALSE,
-                      rowHeaders = TRUE) %>% hot_context_menu(allowColEdit = TRUE)
-    })
-    observeEvent(input$f2RCont,{
-      output$copypaste2RC <- renderUI(
-        actionButton("abPopSel2RC",HTML("Highlight your data below & click here to <br> populate the cells above"),width = '300px')
-      )
-    })
-    observeEvent(input$gridFile2RC, { #This is necessary to update the table in realtime
-      dfra$data <- hot_to_r(input$gridFile2RC)
-    })
-
-    qCateg <- reactive(input$qCateg)
+    #This function creates a matrix containing the external rating data highlighted by the user
     nijMat.f <- function(iMin,jMin,iMax,jMax){
-      SelData <-matrix(0,iMax-iMin+1,jMax-jMin+1)
+      SelData <- matrix(0,iMax-iMin+1,jMax-jMin+1)
       for (i in iMin:iMax){
         for (j in jMin:jMax){
           SelData[i-iMin+1,j-jMin+1] <- input$gridFile2RC_select$data[[i]][[j]]
         }
       }
       return(SelData)
-    }
+    }##END: nijMat.f
+    
+    #This function populates the contingency table cells with the ratings contained in the "RatingsMat"
     PopulateConTable.f <- function(RatingsMat){
       nb.rows <- nrow(RatingsMat)
       nb.cols <- ncol(RatingsMat)
@@ -157,100 +260,44 @@ shinyServer(
           if (i<=nb.rows & j<=nb.cols){
             updateTextInput(session,paste0("Cells2C",i,j), label = NULL,value = RatingsMat[i,j])
           }else{
-            updateTextInput(session,paste0("Cells2C",i,j), label = NULL,value = "0")
+            updateTextInput(session,paste0("Cells2C",i,j), label = NULL,value = 0)
           }
         }
       }
-    }
-    min <- reactiveValues(i=1,j=1)
-    max <- reactiveValues(i=1,j=1)
-
-    observeEvent(input$abPopSel2RC,{
-      min$i <- input$gridFile2RC_select$select$r
-      min$j <- input$gridFile2RC_select$select$c
-      max$i <- input$gridFile2RC_select$select$r2
-      max$j <- input$gridFile2RC_select$select$c2
-      if (!is.null(min$i)){
-        PopulateConTable.f(nijMat.f(min$i,min$j,max$i,max$j))
-        cnames2RC$cols <- colnames(dfra$data)[min$j:max$j]
-        updateTextInput(session, inputId="ti.clabels2RC", label = NULL, value = cnames2RC$cols[1:input$qCateg])
-      }
-    })
-    observe({
-      if (!is.null(dfra$data)){
-        PopulateConTable.f(dfra$data[1:input$qCateg,1:input$qCateg])
-      }
-    })
-
-    shinyjs::disable("chkpct2RC") # disable checkbox of percent agreement
-
-    #- User-defined function to read the contingency table of ratings
-    read.ratings <- function(q){
-      nkl.mat <- matrix(0,q,q)
-      for (k in 1:q){
-        for (l in 1:q){
-          nkl.mat[k,l] <- as.numeric(input[[paste0('Cells2C',k,l)]])
-        }
-      }
-      nkl.mat
-    }
-
-#    read.ratings <- function(q){
-#      nkl.mat <- matrix(0,q,q)
-#      lapply(1:q,function(k){
-#        lapply(1:q,function(l){
-#          nkl.mat[k,l] <- as.numeric(input[[paste0('Cells2C',k,l)]])
-#        })
-#      })
-#      nkl.mat
-#    }
-
-    #- User-defined function to read the contingency table of custom weights
-
-    read.cweights <- function(catego.vec){
-      q <- length(catego.vec)
-      nkl.mat <- matrix(0,q,q)
-      for (k in 1:q){
-        for (l in 1:q){
-          nkl.mat[k,l] <- as.numeric(input[[paste0('wCells2C',k,l)]])
-        }
-      }
-      nkl.mat
-    }
+    }##END: PopulateConTable.f
 
     # Function to generate the appropriate weights for the weighted analysis
-
     Weights2C.f <-function(){
       if (input$chkweighted2RC==TRUE){
         if (input$optWtype2RC=="predw"){
           switch(input$optweights2RC,
                  quaw={
                    weight.tit <-"Quadratic Weights"
-                   weight.mat <- quadratic.weights(1:input$qCateg)
+                   weight.mat <- quadratic.weights(1:as.numeric(input$qCateg))
                  },
                  linw={
                    weight.tit <-"Linear Weights"
-                   weight.mat <- linear.weights(1:input$qCateg)
+                   weight.mat <- linear.weights(1:as.numeric(input$qCateg))
                  },
                  radw={
                    weight.tit <-"Radical Weights"
-                   weight.mat <- radical.weights(1:input$qCateg)
+                   weight.mat <- radical.weights(1:as.numeric(input$qCateg))
                  },
                  ordw={
                    weight.tit <-"Ordinal Weights"
-                   weight.mat <- ordinal.weights(1:input$qCateg)
+                   weight.mat <- ordinal.weights(1:as.numeric(input$qCateg))
                  },
                  ratw={
                    weight.tit <-"Ratio Weights"
-                   weight.mat <- ratio.weights(1:input$qCateg)
+                   weight.mat <- ratio.weights(1:as.numeric(input$qCateg))
                  },
                  cirw={
                    weight.tit <-"Circular Weights"
-                   weight.mat <- circular.weights(1:input$qCateg)
+                   weight.mat <- circular.weights(1:as.numeric(input$qCateg))
                  },
                  bipw={
                    weight.tit <-"Bipolar Weights"
-                   weight.mat <- bipolar.weights(1:input$qCateg)
+                   weight.mat <- bipolar.weights(1:as.numeric(input$qCateg))
                  }
           )#switch
         }else { # these are custom weights
@@ -259,13 +306,12 @@ shinyServer(
         }
       }else{ # these are identity weights
         weight.tit <-""
-        weight.mat <- identity.weights(1:input$qCateg)
+        weight.mat <- identity.weights(1:as.numeric(input$qCateg))
       }
       return(list(wtit=weight.tit,wmat=weight.mat))
-    }
-
+    }##END: Weights2C.f
+    
     # The coefficients2C.f function returns a data frame containing all coefficients
-
     coefficients2C.f <- function(wtmat.p){
       coeffmat.p <- data.frame()
       conf.lev = reactive(as.numeric(input$cmbclev2RC)/100)
@@ -292,6 +338,234 @@ shinyServer(
       }
       coeffmat.p = rbind(coeffmat.p,pa2.table(ratings=ratings.mat(),weights=wtmat.p,conflev = conf.lev()))
       return(coeffmat.p)
+    }##END: coefficients2C.f
+
+    #
+    ## This function generates a string vector containing all tables produced by the 2RC process
+    #
+    output.tables2RC.f <- function(){
+      out.tabs <- "DF.Out2RC,DF.Unweighted2RC"
+      if (input$optbench !="none") out.tabs <- paste0(out.tabs,",DFR")
+      if (input$chkweighted2RC==TRUE){
+        out.tabs <- paste0(out.tabs,",DF.Weighted2RC")
+        if (input$optbench !='none') out.tabs <- paste0(out.tabs,",WBenchTable")
+        out.tabs <- paste0(out.tabs,",Weights.frame")
+      }
+      return(out.tabs)
+    }
+    
+    ## Function PDF.exportCAC2RC.fn exports to a PDF file all results displayed on the screen.  The first parameter 
+    #'out.tables' is a list of all tables that were created by the Exceute command. It uses "function add.row.f".
+    
+    PDF.exportCAC2RC.fn <- function(out.tables,
+                                 pdftit1,pdftit2,pdftit3,
+                                 pdftit4,pdftit5,pdftit6){
+      nb.tables <- length(out.tables) # Number of tables created for each group
+      ### t.list contains a list of all tables along with their titles. Tables and associated titles are created as single Grob objects
+      tit.size <- textGrob(paste0(rep("a",75),collapse=""),gp=gpar(size=12,font=3)) #dummy string used to position tables
+      tab1 <- add.row.f(pdftit1,tableGrob(as.data.frame(out.tables[[1]])),tit.size)
+      tab2 <- add.row.f(pdftit2,tableGrob(as.data.frame(out.tables[[2]]),rows=NULL),pdftit2)
+      #tab2 <- add.row.f(pdftit2,tab2,pdftit2)
+      tab.list <- list(tab1,tab2)
+      if (nb.tables==3){
+        tab3 <- add.row.f(pdftit3,tableGrob(as.data.frame(out.tables[[3]])),tit.size)
+        #tab3 <- add.row.f(pdftit4,tab3,pdftit2)
+        tab.list <- list(tab1,tab2,tab3)
+      }
+      if (nb.tables==4){
+        catvec <- colnames(out.tables[[4]])
+        tab3 <- add.row.f(pdftit4,tableGrob(as.data.frame(out.tables[[3]]),rows=NULL),tit.size)
+        tab4 <- add.row.f(pdftit5,tableGrob(as.data.frame(out.tables[[4]]),rows=catvec,cols=catvec),tit.size)
+        tab.list <- list(tab1,tab2,tab3,tab4)
+      }
+      if (nb.tables==6){
+        catvec <- colnames(out.tables[[6]])
+        tab3 <- add.row.f(pdftit3,tableGrob(as.data.frame(out.tables[[3]])),tit.size)
+        #tab3 <- add.row.f(pdftit4,tab3,pdftit2)
+        tab4 <- add.row.f(pdftit4,tableGrob(as.data.frame(out.tables[[4]]),rows=NULL),tit.size)
+        tab5 <- add.row.f(pdftit5,tableGrob(as.data.frame(out.tables[[5]])),tit.size)
+        #tab5 <- add.row.f(pdftit7,tab5,pdftit2)
+        tab6 <- add.row.f(pdftit6,tableGrob(as.data.frame(out.tables[[6]]),rows=catvec,cols=catvec),tit.size)
+        tab.list <- list(tab1,tab2,tab3,tab4,tab5,tab6)
+      }
+      
+      toptit0 <- "INTER-RATER RELIABILITY ANALYSIS / CAC"
+      toptit1 <- "Unweighted Analysis of Agreement Coefficients"
+      toptit2 <- "Weighted Analysis of Agreement Coefficients"
+      xtime <- format(Sys.time(), "%a %b %d %X %Y")
+      output$ExportPDF2RC = downloadHandler(
+        filename = function() {paste("agreestat",".pdf",sep="")},
+        content = function(file){
+          pdf(file, onefile = TRUE,width=8.5,height=11)
+          if (nb.tables<=3){
+            grp.tabs <- sapply(1:nb.tables, function(k){
+              return(paste0("tab.list[[",k,"]],"))
+            })
+            grp.tabs <- paste(grp.tabs,collapse="")
+            eval(parse(text=paste0(
+              "grid.arrange(",grp.tabs,"nrow=nb.tables,
+                             bottom = textGrob(paste0('---------- ',xtime,' ----------')),
+                             top = textGrob(toptit1,gp=gpar(fontsize=14,font=2)),
+                             vp=viewport(h=0.9)
+                           )"
+            )))
+          }else{
+            if (nb.tables==4) nb.max <- 2
+            else nb.max <- 3
+            grp.tabs <- sapply(1:nb.max, function(k){
+              return(paste0("tab.list[[",k,"]],"))
+            })
+            grp.tabs <- paste(grp.tabs,collapse="")
+            eval(parse(text=paste0(
+              "grid.arrange(",grp.tabs,"nrow=nb.max,
+                             bottom = textGrob(paste0('---------- ',xtime,' ----------')),
+                             top = textGrob(toptit1,gp=gpar(fontsize=14,font=2)),
+                             vp=viewport(h=0.9)
+                           )"
+            )))
+            grp.tabs <- sapply((nb.tables-nb.max+1):nb.tables, function(k){
+              return(paste0("tab.list[[",k,"]],"))
+            })
+            grp.tabs <- paste(grp.tabs,collapse="")
+            eval(parse(text=paste0(
+              "grid.arrange(",grp.tabs,"nrow=nb.max,
+                             bottom = textGrob(paste0('---------- ',xtime,' ----------')),
+                             top = textGrob(toptit2,gp=gpar(fontsize=14,font=2)),
+                             vp=viewport(h=0.9)
+                           )"
+            )))
+          }
+          dev.off()
+        }
+      )
+    }#### END OF the "function PDF.export.fn(out.tables)"
+    
+    
+    
+    
+    
+    
+    
+    
+    #This function creates all ratings table cells and category labels
+    create.all.cells <- function(){
+      output$Ratings <-renderUI(
+        lapply(1:as.numeric(input$qCateg), function(i) {
+          fluidRow(
+            if (!is.null(cnames2RC$cols)){
+              if (!is.na(cnames2RC$cols[i])) column(width=1, helpText(substr(cnames2RC$cols[i],1,6)),offset=0)
+              else column(width=1, helpText(paste0('Categ', i)),offset=0)
+            }else{
+              if (!is.na(clabels()[i])) column(width=1, helpText(substr(clabels()[i],1,6)))
+              else column(width=1, helpText(paste0('Categ', i)))
+            },
+            lapply(1:as.numeric(input$qCateg), function(j) {
+              column(width=1, textInput(paste0("Cells2C",i,j), label = NULL,value = 0),
+                     tags$style(type='text/css',paste0("#Cells2C",i,j," { width: 50px;text-align:center;}")),offset = 0)
+            })
+          )
+        })
+      )
+    }
+    
+    create.all.cells() #This call initiates the creation of all contingency table cells
+    
+    #
+    #####-------------------------   END GENERAL FUNCTIONS  ----------------------------------------
+    #
+    
+    bench.request <- reactiveValues(BR=FALSE) # This reactive object stores the reactive value bench.request$BR that will become TRUE as soon as the first benchmarking is placed.
+                                              # This is needed to improve the app's functionality.
+    bench.request.w <- reactiveValues(WBR=FALSE) # Equivalent of bench.request for weighted coefficients
+
+    #  -------------------------------------------------------------------
+    #- Data capture for contingency table analysis / data supplied by user
+    #  -------------------------------------------------------------------
+
+    # reset the external file used to import data into the contingency table
+    observeEvent(input$Reset2Cont,{
+      reset("f2RCont")
+    })
+
+    # Importing external data into the contingency table
+    
+    dfra <- reactiveValues(data=NULL)
+    cnames2RC <- reactiveValues(cols=NULL)
+    output$gridFile2RC = renderRHandsontable({
+        inFile <- input$f2RCont
+        if (is.null(inFile)) {return(NULL)}
+        if (isolate(input$ftype2RC)=='csv') DF <- read.csv(inFile$datapath, header = FALSE,sep = input$sep, quote = input$quote)
+        else DF <- read_excel(inFile$datapath)
+        dfra$data <- DF
+        cnames2RC$cols <- colnames(DF)
+        q.obs <- length(colnames(DF))
+        updateTextInput(session, inputId="ti.clabels2RC", label = NULL,value = colnames(DF)[1:q.obs])
+        rhandsontable(DF, selectCallback = TRUE,width=350,height = 450,useTypes = FALSE,
+                      rowHeaders = TRUE) %>% hot_context_menu(allowColEdit = TRUE)
+    })
+    observeEvent(input$f2RCont,{
+      output$copypaste2RC <- renderUI(
+        actionButton("abPopSel2RC",HTML("Highlight your data below & click here to <br> populate the cells above"),width = '300px',
+                     class = "btn action-button",style = "color: white;background-color: darkgreen")
+      )
+    })
+    observeEvent(input$gridFile2RC, { #This is necessary to update the table in realtime
+      dfra$data <- hot_to_r(input$gridFile2RC)
+    })
+
+    qCateg <- reactive(as.numeric(input$qCateg))
+
+    min <- reactiveValues(i=1,j=1)
+    max <- reactiveValues(i=1,j=1)
+
+    observeEvent(input$abPopSel2RC,{
+      min$i <- input$gridFile2RC_select$select$r
+      min$j <- input$gridFile2RC_select$select$c
+      max$i <- input$gridFile2RC_select$select$r2
+      max$j <- input$gridFile2RC_select$select$c2
+      if (!is.null(min$i)){
+        PopulateConTable.f(nijMat.f(min$i,min$j,max$i,max$j))
+        q.cat <- as.numeric(input$qCateg)
+        if (q.cat>ncol(dfra$data)){
+          col.labels <- c(colnames(dfra$data),sapply(1:(q.cat-ncol(dfra$data)),function(x) paste0("Categ",x)))
+          updateTextInput(session, inputId="ti.clabels2RC", label = NULL, value = col.labels)
+        }else{
+          updateTextInput(session, inputId="ti.clabels2RC", label = NULL, value = colnames(dfra$data))
+        }
+      }
+    })
+    observe({
+      if (!is.null(dfra$data)){
+        nb.rows <- min(as.numeric(nrow(dfra$data)),as.numeric(input$qCateg))
+        nb.cols <- min(ncol(dfra$data),as.numeric(input$qCateg))
+        PopulateConTable.f(dfra$data[1:nb.rows,1:nb.cols])
+      }
+    })
+
+    shinyjs::disable("chkpct2RC") # disable checkbox of percent agreement
+
+    #- This function reads the contingency table of ratings
+    read.ratings <- function(q){
+      nkl.mat <- matrix(0,q,q)
+      for (k in 1:q){
+        for (l in 1:q){
+          nkl.mat[k,l] <- as.numeric(input[[paste0('Cells2C',k,l)]])
+        }
+      }
+      nkl.mat
+    }
+
+    #- User-defined function to read the contingency table of custom weights
+
+    read.cweights <- function(catego.vec){
+      q <- length(catego.vec)
+      nkl.mat <- matrix(0,q,q)
+      for (k in 1:q){
+        for (l in 1:q){
+          nkl.mat[k,l] <- as.numeric(input[[paste0('wCells2C',k,l)]])
+        }
+      }
+      nkl.mat
     }
 
     # Read ratings from the contingency table
@@ -321,7 +595,7 @@ shinyServer(
     })
     #- Compute unweighted coefficients
     UnweightedFR <- reactive({
-      DFR <- coefficients2C.f(identity.weights(1:isolate(input$qCateg)))
+      DFR <- coefficients2C.f(identity.weights(1:isolate(as.numeric(input$qCateg))))
       coeff.cols[4] <- paste0(isolate(input$cmbclev2RC),"%conf.interv")
       colnames(DFR) <- coeff.cols
       DFR
@@ -352,12 +626,25 @@ shinyServer(
     #######  EXECUTE / Contingency Table ------------> observeEvent(input$cmdExecute2xC,{
 
     observeEvent(input$cmdExecute2xC,{
-      ItemsUnweighted$tab <- NULL
-      ItemsWeighted$tab <- NULL
+      pdf.tit2RC1 <- textGrob("Distribution of Subjects by Rater and Category",gp=gpar(size=12,font=3))
+      pdf.tit2RC2 <- textGrob("Inter-Rater Reliability Coefficients & Associated Precision Measures",gp=gpar(size=12,font=3))
+      if (input$optbench !="none"){
+        bench.name <- switch (input$optbench,
+                              lk = "Landis-Koch",
+                              altman = "Altman",
+                              fleiss = "Fleiss"
+        )
+        pdf.tit2RC3 <- textGrob(paste0(bench.name," Interpretation of Unweighted Agreement Coefficients"),gp=gpar(size=12,font=3))
+      }
+      if (input$chkweighted2RC==TRUE){
+        Wt.title2RC <- WeightsGen.f(1:as.numeric(input$qCateg),input$chkweighted2RC,input$optWtype2RC,
+                                    input$optweights2RC,"2C")$wtit
+        pdf.tit2RC4 <- textGrob(paste0("Weighted Agreement Coefficients / ",Wt.title2RC),gp=gpar(size=12,font=3))
+        if (input$optbench !="none") pdf.tit2RC6 <- textGrob(paste0(bench.name," Interpretation of Weighted Agreement Coefficients"),gp=gpar(size=12,font=3))
+        pdf.tit2RC5 <- textGrob(Wt.title2RC,gp=gpar(size=12,font=3))
+      }
       updateTabsetPanel(session, "TabsetId", selected = "panel3") # Once the execute button is pressed the "Output" tabpanel must be selected
       output$titDist2C <- renderUI(HTML("<b>DISTRIBUTION OF SUBJECTS BY RATER AND CATEGORY</b>"))
-      pdftit2RC1<-textGrob("Distribution of Subjects by Rater and Category",gp=gpar(size=12,font=3))
-      pdftit2RC2<-textGrob("Inter-Rater Reliability Coefficients & Associated Precision Measures",gp=gpar(size=12,font=3))
       output$hline2C <- renderUI(tags$hr(style="border-color: purple;"))
       output$titCoeff <- renderUI(HTML("<b>INTER-RATER RELIABILITY COEFFICIENTS & ASSOCIATED PRECISION MEASURES</b>"))
       output$titUnWt2C <- renderUI(HTML("<br>Unweighted Agreement Coefficients<br>"))
@@ -366,31 +653,28 @@ shinyServer(
       DF.Out2RC <- as.data.frame(ratings.mat())
       DF.Unweighted2RC <-as.data.frame(UnweightedFR())
       if (!is.na(clabels()[1])){ #
-        if (length(clabels()) == input$qCateg){
-          colnames(DF.Out2RC) <- clabels()[1:length(clabels())]
-          rownames(DF.Out2RC) <- clabels()[1:length(clabels())]
+        if (length(clabels()) >= as.numeric(input$qCateg)){
+          colnames(DF.Out2RC) <- clabels()[1:as.numeric(input$qCateg)]
+          rownames(DF.Out2RC) <- clabels()[1:as.numeric(input$qCateg)]
         }else{
           colnames(DF.Out2RC) <- c(clabels()[1:length(clabels())],
-                                   unlist(lapply((length(clabels())+1):input$qCateg, function(j) {paste0("Categ",j)})))
+                                   unlist(lapply((length(clabels())+1):as.numeric(input$qCateg), function(j) {paste0("Categ",j)})))
           rownames(DF.Out2RC) <- c(clabels()[1:length(clabels())],
-                                   unlist(lapply((length(clabels())+1):input$qCateg, function(j) {paste0("Categ",j)})))
+                                   unlist(lapply((length(clabels())+1):as.numeric(input$qCateg), function(j) {paste0("Categ",j)})))
         }
       }else{
-        colnames(DF.Out2RC) <- unlist(lapply(1:input$qCateg, function(j) {paste0("Categ",j)}))
-        rownames(DF.Out2RC) <- unlist(lapply(1:input$qCateg, function(j) {paste0("Categ",j)}))
+        colnames(DF.Out2RC) <- unlist(lapply(1:as.numeric(input$qCateg), function(j) {paste0("Categ",j)}))
+        rownames(DF.Out2RC) <- unlist(lapply(1:as.numeric(input$qCateg), function(j) {paste0("Categ",j)}))
       }
       # Display the input contingency table ,rownames = TRUE
       output$gridCont2RC = renderTable(DF.Out2RC,rownames = TRUE,bordered = TRUE,spacing = 'xs',digits = 0)
       isprinted$ct<-TRUE
-      ItemsUnweighted$tab <- "pdftit2RC1,tableGrob(DF.Out2RC)"
 
       # Computing the selected agreement coefficients & their standard errors
       DF.Unweighted2RC$coeff <- format(DF.Unweighted2RC$coeff,digits=3)
       DF.Unweighted2RC$stderr <- format(DF.Unweighted2RC$stderr,digits=2,nsmall=3)
       colnames(DF.Unweighted2RC) <- c("Method", "Coeff", "StdErr",paste0(input$cmbclev2RC,"% C.I."),"P-Value")
-
       output$gridOutCont <- renderTable(DF.Unweighted2RC,bordered = TRUE,spacing = 'xs',striped = TRUE)
-      ItemsUnweighted$tab <- paste0(ItemsUnweighted$tab,",pdftit2RC2,tableGrob(DF.Unweighted2RC,rows=NULL)")
 
       # Has benchmarking been requested?  If yes, then output the benchmarking table for unweighted coefficients
       if (input$optbench !="none"){
@@ -402,16 +686,13 @@ shinyServer(
         )
         output$titBench1U2C <- renderUI(HTML("<b>",paste0(bench.name," Interpretation of Unweighted Agreement Coefficients</b>")))
         output$titBench2U2C <- renderUI(HTML("Benchmarking Unweighted Coefficients using Cumulative Membership Probabilities"))
-        pdftit2RC3<-textGrob(paste0(bench.name," Interpretation of Unweighted Agreement Coefficients"),gp=gpar(size=12,font=3))
         DFR <- benchmark.table(UnweightedFR(),"2C")
-        ItemsUnweighted$tab <- paste0(ItemsUnweighted$tab,",pdftit2RC3,tableGrob(DFR,rows=NULL)") #Update the global list of tables that can be exported to a PDF file
         bench.request$BR <- TRUE #Indicator that a benchmarking has been printed
         output$gridOutBenchU2C <- renderTable(DFR,bordered = TRUE,spacing = 'xs',rownames = TRUE)
-
         if (input$chkweighted2RC==TRUE){
           output$titBench1W2C <- renderUI(HTML("<b>",paste0(bench.name," Interpretation of Weighted Agreement Coefficients</b>")))
           output$titBench2W2C <- renderUI(HTML("Benchmarking Weighted Coefficients using Cumulative Membership Probabilities"))
-          dftit3RC2W<-textGrob(paste0(bench.name," Interpretation of Weighted Agreement Coefficients</b>"),gp=gpar(size=12,font=3))
+          pdftit3RC2W<-textGrob(paste0(bench.name," Interpretation of Weighted Agreement Coefficients</b>"),gp=gpar(size=12,font=3))
         }
         else{
           output$titBench1W2C <- renderUI(HTML(""))
@@ -442,36 +723,25 @@ shinyServer(
         colnames(DF.Weighted2RC) <- c("Method", "Coeff", "StdErr",paste0(input$cmbclev2RC,"% C.I."),"P-Value")
         output$gridOutWted2C <- renderTable(DF.Weighted2RC,bordered = TRUE,spacing = 'xs',striped = TRUE) # Printing out weighted coefficients
         # Output the weight matrix
-        pdftit2RC2W<-textGrob(isolate(Weights2C.f()$wtit),gp=gpar(size=12,font=3))
+
         output$titWtype2C <- renderUI(HTML(isolate(Weights2C.f()$wtit)))
         Weights.frame <- as.data.frame(round(Weights(),4),colnames=NULL)
         if (!is.na(clabels()[1])){
-          colnames(Weights.frame) <- clabels()[1:input$qCateg]
-          rownames(Weights.frame) <- clabels()[1:input$qCateg]
+          colnames(Weights.frame) <- clabels()[1:as.numeric(input$qCateg)]
+          rownames(Weights.frame) <- clabels()[1:as.numeric(input$qCateg)]
         }else{
-          colnames(Weights.frame) <- unlist(lapply(1:input$qCateg, function(j) {paste0("Categ",j)}))
-          rownames(Weights.frame) <- unlist(lapply(1:input$qCateg, function(j) {paste0("Categ",j)}))
+          colnames(Weights.frame) <- unlist(lapply(1:as.numeric(input$qCateg), function(j) {paste0("Categ",j)}))
+          rownames(Weights.frame) <- unlist(lapply(1:as.numeric(input$qCateg), function(j) {paste0("Categ",j)}))
         }
         #Printing the weight matrix used to compute weighted agreement coefficients
         output$gridOutWeights2C = renderTable(Weights.frame,rownames = TRUE,bordered = TRUE,spacing = 'xs')
-        ItemsWeighted$tab<-paste0(ItemsWeighted$tab,",pdftit2RC2W,tableGrob(Weights.frame)")
 
         if (isolate(input$optbench) !='none'){
           WBenchTable <- benchmark.table(isolate(Wted.frame()),"2C")
           WBenchTable1 <- Wted.frame
           bench.request.w$WBR <- TRUE
           output$gridOutBenchW2C=renderTable(WBenchTable,bordered = TRUE,spacing = 'xs')
-
-          ItemsWeighted$tab<-paste0(ItemsWeighted$tab,",dftit3RC2W,tableGrob(WBenchTable,rows=NULL)")
-          ItemsWeighted$tab <- paste0("grid.arrange(",ItemsWeighted$tab,
-                                      ",bottom=textGrob('---- End of the Weighted Analysis ------')",
-                                      ",top = textGrob('Weighted Analysis of Agreement Coefficients',gp=gpar(fontsize=14,font=2)),",
-                                      "vp=viewport(width=0.7, height=0.85),nrow=7)")
-        }else{
-          ItemsWeighted$tab <- paste0("grid.arrange(",ItemsWeighted$tab,
-                                      ",bottom=textGrob('---- End of the Weighted Analysis ------')",
-                                      ",top = textGrob('Weighted Analysis of Agreement Coefficients',gp=gpar(fontsize=14,font=2)),",
-                                      "vp=viewport(width=0.7, height=0.85),nrow=5)")
+      }else{
           if (bench.request.w$WBR){
             output$gridOutBenchW2C <- renderTable(data.frame())
           }
@@ -485,33 +755,11 @@ shinyServer(
         output$gridOutBenchW2C <- renderTable(data.frame())
       } #End of weighted analysis
 
-
-
       #-> Exporting the output to a PDF file
-
-      if (input$optbench !="none"){
-        ItemsUnweighted$tab <- paste0("grid.arrange(",ItemsUnweighted$tab,
-                                      ",bottom=textGrob('---- End of Unweighted Analysis ------')",
-                                      ",top = textGrob('Unweighted Analysis of Agreement Coefficients',gp=gpar(fontsize=14,font=2)),",
-                                      "vp=viewport(width=0.7, height=0.85),nrow=7)")
-      }else{
-        ItemsUnweighted$tab <- paste0("grid.arrange(",ItemsUnweighted$tab,
-                                      ",bottom=textGrob('---- End of Unweighted Analysis ------')",
-                                      ",top = textGrob('Unweighted Analysis of Agreement Coefficients',gp=gpar(fontsize=14,font=2)),",
-                                      "vp=viewport(width=0.7, height=0.85),nrow=5)")
-      }
-      output$ExportPDF2RC = downloadHandler(
-        # filename = function() {paste("agreestat", "_",Sys.time(),".pdf",sep="")},
-        filename = function() {paste("agreestat",".pdf",sep="")},
-        content = function(file) {
-          pdf(file, onefile = TRUE,width=8.5,height=11)
-          eval(parse(text=ItemsUnweighted$tab))
-          if (!is.null(ItemsWeighted$tab)){
-            eval(parse(text=ItemsWeighted$tab))
-          }
-          dev.off()
-        }
-      )
+      out.tables <- eval(parse(text=paste0("list(",output.tables2RC.f(),")"))) #Here is where the list of output tables is created for 2RC analysis
+      PDF.exportCAC2RC.fn(out.tables,
+                       pdf.tit2RC1,pdf.tit2RC2,pdf.tit2RC3,
+                       pdf.tit2RC4,pdf.tit2RC5,pdf.tit2RC6)
     }) # END OF observeEvent(input$cmdExecute2xC,{
 
 
@@ -531,7 +779,7 @@ shinyServer(
     output$Categories <-renderUI( #display category labels in the first row
       fluidRow(
         column(1, helpText("")),
-        lapply(1:input$qCateg, function(j) {
+        lapply(1:as.numeric(input$qCateg), function(j) {
           if (!is.null(cnames2RC$cols) & input$Import2RR==TRUE){
             if (!is.na(cnames2RC$cols[j])) column(width=1, helpText(substr(cnames2RC$cols[j],1,6)),offset=0)
             else column(width=1, helpText(paste0('Categ', j)),offset=0)
@@ -545,33 +793,6 @@ shinyServer(
       )
     )
 
-    ratings.populate <- function(){
-      output$Ratings <-renderUI( # display all ratings table cells and category labels of the first column
-        lapply(1:input$qCateg, function(i) {
-          fluidRow(
-            if (!is.null(cnames2RC$cols)){
-              if (!is.na(cnames2RC$cols[i])) column(width=1, helpText(substr(cnames2RC$cols[i],1,6)),offset=0)
-              else column(width=1, helpText(paste0('Categ', i)),offset=0)
-            }else{
-              if (!is.na(clabels()[i])) column(width=1, helpText(substr(clabels()[i],1,6)))
-              else column(width=1, helpText(paste0('Categ', i)))
-            },
-            lapply(1:input$qCateg, function(j) {
-              column(width=1, textInput(paste0("Cells2C",i,j), label = NULL,value = isolate(nkl.mat())[i,j]),
-                     tags$style(type='text/css',paste0("#Cells2C",i,j," { width: 50px;text-align:center;}")),offset = 0)
-            })
-          )
-        })
-      )
-    }
-    nkl.mat <- reactive({
-      q <- as.numeric(input$qCateg)
-      if (!is.null(input[[paste0('Cells2C',q,q)]])) read.ratings(q)
-      else
-        matrix(0,q,q)
-    })
-    ratings.populate()
-
     #------------------------------------------------------------------------------
     #   Create crosstab for capturing custom weights
     #------------------------------------------------------------------------------
@@ -581,7 +802,7 @@ shinyServer(
     output$crowcategs <-renderUI(
       fluidRow(
         column(1, helpText("")),
-        lapply(1:input$qCateg, function(j) {
+        lapply(1:as.numeric(input$qCateg), function(j) {
           if (!is.null(cnames2RC$cols) ){
             if (!is.na(cnames2RC$cols[j])) column(width=1, helpText(substr(cnames2RC$cols[j],1,6)),offset=0)
             else column(width=1, helpText(paste0('Categ', j)),offset=0)
@@ -595,7 +816,7 @@ shinyServer(
     # display all custom weights table cells and category labels of the first column
 
     output$cweights <-renderUI(
-      lapply(1:input$qCateg, function(i) {
+      lapply(1:as.numeric(input$qCateg), function(i) {
         fluidRow(
           if (!is.null(cnames2RC$cols)){
             if (!is.na(cnames2RC$cols[i])) column(width=1, helpText(substr(cnames2RC$cols[i],1,6)),offset=0)
@@ -605,7 +826,7 @@ shinyServer(
             else column(width=1, helpText(paste0('Categ', i)))
           },
           #column(width=1, helpText(paste0('Categ', i))),
-          lapply(1:input$qCateg, function(j) {
+          lapply(1:as.numeric(input$qCateg), function(j) {
             if (i==j){
               column(width=1, textInput(paste0("wCells2C",i,j), label = NULL,value = "1"),
                      tags$style(type='text/css',paste0("#wCells2C",i,j," { width: 50px;text-align:center;}")),offset = 0)
@@ -619,7 +840,7 @@ shinyServer(
     )
     #--> disable all diagonal cells in the custom weights table
     observe({
-      lapply(1:input$qCateg, function(i) {
+      lapply(1:as.numeric(input$qCateg), function(i) {
         if (!is.null(input[[paste0("wCells2C",i,i)]])) {
           shinyjs::disable(paste0("wCells2C",i,i))
         }
@@ -754,7 +975,7 @@ shinyServer(
           as.matrix(dfra2RR$data[nratings.r2.row1:nratings.r2.row2,nratings.r2.colno])
         )
       )
-      fra2RR.mat <- trim(as.matrix(DF.2RR))
+      fra2RR.mat <- StrTrim(as.matrix(DF.2RR))
       fra2RR.mat[fra2RR.mat==""] <- NA
       categ.init <- unique(na.omit(as.vector(unlist(fra2RR.mat))))
       catego.vec <- sort(categ.init)
@@ -1254,7 +1475,7 @@ shinyServer(
 
         #7.1.2 Calculating the vector of unique category values categ$vec2RR
 
-        fra2RR.mat <- trim(as.matrix(DF.2RR))
+        fra2RR.mat <- StrTrim(as.matrix(DF.2RR))
         fra2RR.mat[fra2RR.mat==""] <- NA
         categ.init <- unique(na.omit(as.vector(fra2RR.mat[,2:ncol(fra2RR.mat)])))
         categ$vec2RR <- sort(categ.init)
@@ -1276,7 +1497,7 @@ shinyServer(
                               matrix(NA,r2.gap.row2,1)))
 
         #7.1.2 - Calculating the vector of unique category values categ$vec2RR
-        fra2RR.mat <- cbind(rep(1,nrow(DF.2RR)),trim(as.matrix(DF.2RR)))
+        fra2RR.mat <- cbind(rep(1,nrow(DF.2RR)),StrTrim(as.matrix(DF.2RR)))
         colnames(fra2RR.mat) <- c("Group",rater.name$r1,rater.name$r2)
         fra2RR.mat[fra2RR.mat==""] <- NA
         categ.init <- unique(na.omit(as.vector(unlist(fra2RR.mat[,2:ncol(fra2RR.mat)]))))
@@ -1508,7 +1729,8 @@ shinyServer(
                                             input$chkkappa2RR, input$chkac12RR, input$chkpi2RR,
                                             input$chkalpha2RR, input$chkkbp2RR)[,c(1,4:7)]
 
-          colnames(fra.Coeff2RR) <- coeff.cols
+          #colnames(fra.Coeff2RR) <- coeff.cols
+          colnames(fra.Coeff2RR) <- c("Method", "Coeff", "StdErr",paste0(input$cmbclev2RR,"% C.I."),"P-Value")
           if (gIndex.max==1){
             output$r1name2RR <- renderUI(HTML(paste0("<b>",colnames(fra2RR.mat)[2],"</b>")))
             output$r2name2RR <- renderUI(HTML(paste0("<b>",colnames(fra2RR.mat)[3],"</b>")))
@@ -1530,7 +1752,8 @@ shinyServer(
               DF.Weighted2RR <- coefficients3RR.f(Weights2RR,categ$vec2RR,frame.i,
                                                   input$chkkappa2RR, input$chkac12RR, input$chkpi2RR,
                                                   input$chkalpha2RR, input$chkkbp2RR)[,c(1,4:7)] #compute weighted coefficients
-              colnames(DF.Weighted2RR) <- coeff.cols
+              #colnames(DF.Weighted2RR) <- coeff.cols
+              colnames(fra.Coeff2RR) <- c("Method", "Coeff", "StdErr",paste0(input$cmbclev2RR,"% C.I."),"P-Value")
               output$gridOutWted2R <- renderTable(DF.Weighted2RR,bordered = TRUE,spacing = 'xs') # Printing out weighted coefficients
               # Processing the benchmarking of the weighted agreement coefficients if necessary
               if (isolate(input$optbench2RR) !='none'){
@@ -1563,7 +1786,6 @@ shinyServer(
           }
           eval(parse(text=paste0("list(",output.tables2RR.f(),")"))) #Here is where the list of output tables is created
       }) #lapply(1:gIndex.max, function(i) /END of sub-group treatment
-
       PDF.exportCAC.fn(out.tables,"ExportPDF2RR.CAC",groups.vec.all,categ$vec2RR,
                        pdftit2RR1,pdftit2RR2,pdftit2RR3,
                        pdftit2RR4,pdftit2RR5,pdftit2RR6,
@@ -2024,7 +2246,7 @@ shinyServer(
       else nratings.row1 <- nratings$row1
       ratings.r3 <- as.matrix(dfra3RR$data[nratings.row1:nratings$row2,nratings$col1:nratings$colmax])
       dframe <- as.data.frame(ratings.r3)
-      fra3RR.mat <- trim(as.matrix(dframe))
+      fra3RR.mat <- StrTrim(as.matrix(dframe))
       fra3RR.mat[fra3RR.mat==""] <- NA
       categ.init <- unique(na.omit(as.vector(unlist(fra3RR.mat))))
       catego.vec <- sort(categ.init)
@@ -2673,9 +2895,6 @@ shinyServer(
         }
       )
     }#### END OF the "function PDF.export.fn(out.tables)"
-
-
-
 
 
 

@@ -24,6 +24,14 @@ This function computes 2 ICC estimates ICC(3,1) and ICCa(3,1) as measures of int
 coefficients under Model 3.  It is the the mixed factorial ANOVA model with interaction. Some subjects are expected to have
 multiple ratings and due to the assumed interaction effect.
 }
+\examples{
+#iccdata2 is a small dataset that comes with the package. Use it as follows:
+library(irrICC)
+iccdata2 #see what the iccdata2 dataset looks like
+icc3.inter.fn(iccdata2[,2:6]) #Here, you must omit the first column
+coeff <- icc3.inter.fn(iccdata2[,2:6])$icc2a #this gives you intra-rater reliability coefficient
+coeff
+}
 \references{
 Gwet, K.L. (2014): \emph{Handbook of Inter-Rater Reliability - 4th ed.} - Equation #10.2.9 of chapter 10, page 279
 (for the inter-rater reliability ICC(3,1)), and Equation #10.2.10 of chapter 10, page 279 (for the intra-rater reliability ICCa(3,1)),

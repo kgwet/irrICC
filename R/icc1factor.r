@@ -10,6 +10,13 @@
 #' 1. sig2s: the subject variance component. 2. sig2e: the error variance component. 3. icc1a: the ICC/inter-rater reliability coefficient
 #' 4. n: the number of subjects. 5. r: the number of raters. 6. max.rep: the maximum number of ratings per subject. 7. min.rep: the minimum
 #' number of ratings per subjects. 8. M: the total number of ratings for all subjects and raters. 9. ov.mean: the overall mean rating.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' icc1a.fn(iccdata1)
+#' coeff <- icc1a.fn(iccdata1)$icc1a
+#' coeff
 #' @export
 icc1a.fn <- function(ratings){
   ratings <- data.frame(lapply(ratings, as.character),stringsAsFactors=FALSE)
@@ -64,6 +71,13 @@ icc1a.fn <- function(ratings){
 #' 1. sig2r: the rater variance component. 2. sig2e: the error variance component. 3. icc1b: the ICC/intra-rater reliability coefficient
 #' 4. n: the number of subjects. 5. r: the number of raters. 6. max.rep: the maximum number of ratings per subject. 7. min.rep: the minimum
 #' number of ratings per subjects. 8. M: the total number of ratings for all subjects and raters. 9. ov.mean: the overall mean rating.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' icc1b.fn(iccdata1)
+#' coeff <- icc1b.fn(iccdata1)$icc1b #this only gives you the ICC coefficient
+#' coeff
 #' @export
 icc1b.fn <- function(ratings){
   ratings <- data.frame(lapply(ratings, as.character),stringsAsFactors=FALSE)
@@ -236,6 +250,11 @@ msr1b.fn <- function(dfra){
 #' will be 0.95, which is the most commonly-used valuee in the literature.
 #' @importFrom stats pf qf
 #' @return This function returns a vector containing the lower confidence (lcb) and the upper confidence bound (ucb).
+#' @examples
+#' #iccdata3 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata3 #see what the iccdata3 dataset looks like
+#' ci.ICC1a(iccdata3)
 #' @export
 ci.ICC1a <- function(ratings,conflev=0.95){
   #This function produces the model 1A-based confidence interval associated with the intraclass correlation coefficient ICCa
@@ -267,6 +286,11 @@ ci.ICC1a <- function(ratings,conflev=0.95){
 #' @param conflev This is the optional confidence level associated with the confidence interval. If not specified, the default value
 #' will be 0.95, which is the most commonly-used valuee in the literature.
 #' @return This function returns a vector containing the following the lower confidence (lcb) and the upper confidence bound (ucb).
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata3 dataset looks like
+#' ci.ICC1b(iccdata1)
 #' @export
 ci.ICC1b <- function(ratings,conflev=0.95){
   #This function produces the model 1B-based confidence interval associated with the intraclass correlation coefficient ICCa
@@ -296,6 +320,11 @@ ci.ICC1b <- function(ratings,conflev=0.95){
 #' if a subject was assigned multiple ratings) and each of the remaining columns is associated with a particular rater and contains its
 #' numeric ratings.
 #' @return This function returns a vector containing 6 p-values associated with the 6 null values 0,0.1,0.3,0.5,0.7,0.9.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' pval.ICC1a(iccdata1)
 #' @export
 pval.ICC1a <- function(ratings){
   ratings <- data.frame(lapply(ratings, as.character),stringsAsFactors=FALSE)
@@ -326,6 +355,11 @@ pval.ICC1a <- function(ratings){
 #' @param rho.zero This is an optional parameter that represents a vector containing an arbitrary number of null values between 0 and 1
 #' for which a p-value will be calculated. If not specified then its defauklt value will be 0.
 #' @return This function returns a vector containing p-values associated with the null values specified in the parameter rho.zero.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' pvals.ICC1a(iccdata1,c(0,0.17,0.22,0.35))
 #' @export
 pvals.ICC1a <- function(ratings,rho.zero=0){
   ratings <- data.frame(lapply(ratings, as.character),stringsAsFactors=FALSE)
@@ -354,6 +388,11 @@ pvals.ICC1a <- function(ratings,rho.zero=0){
 #' if a subject was assigned multiple ratings) and each of the remaining columns is associated with a particular rater and contains its
 #' numeric ratings.
 #' @return This function returns a vector containing 6 p-values associated with the 6 null values 0,0.1,0.3,0.5,0.7,0.9.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' pval.ICC1b(iccdata1)
 #' @export
 pval.ICC1b <- function(ratings){
   #This function computes 6 Model 1B-based p-values associated with the 6 rho values in rho.zero <- c(0,0.1,0.3,0.5,0.7,0.9)
@@ -386,6 +425,12 @@ pval.ICC1b <- function(ratings){
 #' @param gam.zero This is an optional parameter that represents a vector containing an arbitrary number of null values between 0 and 1
 #' for which a p-value will be calculated. If left unspecified, its default value will be 0.
 #' @return This function returns a vector containing p-values associated with the null values specified in the parameter gam.zero.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' #Let c(0.05,0.13,0.28,0.33) be an arbitrary vector of values between 0 and 1
+#' pvals.ICC1b(iccdata1,c(0.05,0.13,0.28,0.33))
 #' @export
 pvals.ICC1b <- function(ratings,gam.zero=0){
   #This function computes p-values either for a single rho-zero value or for a vector of values assigned to parameter gam.zero= VALUES

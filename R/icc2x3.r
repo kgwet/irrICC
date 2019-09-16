@@ -14,6 +14,13 @@
 #' 6. icc2a: ICC as a measure of intra-rater reliability. 7. n: the number of subjects. 8. r: the number of raters.
 #' 9. max.rep: the maximum number of ratings per subject. 10. min.rep: the minimum number of ratings per subjects.
 #' 11. M: the total number of ratings for all subjects and raters. 12. ov.mean: the overall mean rating.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' icc2.inter.fn(iccdata1)
+#' coeff <- icc2.inter.fn(iccdata1)$icc2r #this only gives you the ICC coefficient
+#' coeff
 #' @export
 icc2.inter.fn <- function(ratings){
   #This function computes the Intraclass Correlation Coefficients ICC(2,1) and ICCa(2,1) under Model 2 with interaction - random factorial design
@@ -103,6 +110,13 @@ icc2.inter.fn <- function(ratings){
 #' 6. icc2a: ICC as a measure of intra-rater reliability. 7. n: the number of subjects. 8. r: the number of raters.
 #' 9. max.rep: the maximum number of ratings per subject. 10. min.rep: the minimum number of ratings per subjects.
 #' 11. M: the total number of ratings for all subjects and raters. 12. ov.mean: the overall mean rating.
+#' @examples
+#' #iccdata2 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata2 #see what the iccdata2 dataset looks like
+#' icc3.inter.fn(iccdata2[,2:6]) #Here, you must omit the first column
+#' coeff <- icc3.inter.fn(iccdata2[,2:6])$icc2a #this gives you intra-rater reliability coefficient
+#' coeff
 #' @export
 icc3.inter.fn <- function(dfra){
   dfra <- data.frame(lapply(dfra, as.character),stringsAsFactors=FALSE)
@@ -353,6 +367,11 @@ mss2.fn <- function(dfra){
 #' will be 0.95, which is the most commonly-used valuee in the literature.
 #' @importFrom stats pf qf
 #' @return This function returns a vector containing the lower confidence (lcb) and the upper confidence bound (ucb).
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' ci.ICC2r.inter(iccdata1)
 #' @export
 ci.ICC2r.inter <- function(dfra,conflev=0.95){
   dfra <- data.frame(lapply(dfra, as.character),stringsAsFactors=FALSE)
@@ -408,6 +427,12 @@ ci.ICC2r.inter <- function(dfra,conflev=0.95){
 #' @param conflev This is the optional confidence level associated with the confidence interval. If not specified, the default value
 #' will be 0.95, which is the most commonly-used valuee in the literature.
 #' @return This function returns a vector containing the lower confidence (lcb) and the upper confidence bound (ucb).
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' ci.ICC3r.inter(iccdata1)
+#' ci.ICC3r.inter(iccdata1)$ucb #to get upper confidence bound only
 #' @export
 ci.ICC3r.inter <- function(dfra,conflev=0.95){
   #This function produces the confidence interval associated with the intraclass correlation coefficient ICC(3,1) - i.e. inter-rater reliability -
@@ -463,6 +488,12 @@ ci.ICC3r.inter <- function(dfra,conflev=0.95){
 #' @param rho.zero This is an optional parameter that represents a vector containing an arbitrary number of null values between 0 and 1
 #' for which a p-value will be calculated. If not specified then its default value will be 0.
 #' @return This function returns a vector containing p-values associated with the null values specified in the parameter rho.zero.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' pvals.ICC3r.inter(iccdata1) #gives you the p-value associated with default null value of 0
+#' pvals.ICC3r.inter(iccdata1,c(0,0.15,0.25,0.33)) #produces p-values for an arbitrary vector
 #' @export
 pvals.ICC3r.inter <- function(dfra,rho.zero=0){
   #This function produces a vector of p-values associated with the intraclass correlation coefficient ICC(3,1) - i.e. inter-rater reliability -
@@ -513,6 +544,13 @@ pvals.ICC3r.inter <- function(dfra,rho.zero=0){
 #' @param conflev This is the optional confidence level associated with the confidence interval. If not specified, the default value
 #' will be 0.95, which is the most commonly-used valuee in the literature.
 #' @return This function returns a vector containing the lower confidence (lcb) and the upper confidence bound (ucb).
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' ci.ICC2a.inter(iccdata1)
+#' ci.ICC2a.inter(iccdata1)$ucb #this only gives the upper confidence bound
+#' ci.ICC2a.inter(iccdata1,0.90) #this gives you the 90% confidence interval
 #' @export
 ci.ICC2a.inter <- function(dfra,conflev=0.95){
   #This function produces the confidence interval associated with the intraclass correlation coefficient ICCa(2,1) - i.e. intra-rater reliability -
@@ -574,6 +612,13 @@ ci.ICC2a.inter <- function(dfra,conflev=0.95){
 #' @param conflev This is the optional confidence level associated with the confidence interval. If not specified, the default value
 #' will be 0.95, which is the most commonly-used valuee in the literature.
 #' @return This function returns a vector containing the lower confidence (lcb) and the upper confidence bound (ucb).
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' ci.ICC3a.inter(iccdata1)
+#' ci.ICC3a.inter(iccdata1)$ucb #this only gives the upper confidence bound
+#' ci.ICC3a.inter(iccdata1,0.90) #this gives you the 90% confidence interval
 #' @export
 ci.ICC3a.inter <- function(dfra,conflev=0.95){
   #This function produces the confidence interval associated with the intraclass correlation coefficient ICCa(3,1) - i.e. intra-rater reliability -
@@ -627,6 +672,11 @@ ci.ICC3a.inter <- function(dfra,conflev=0.95){
 #' if a subject was assigned multiple ratings) and each of the remaining columns is associated with a particular rater and contains its
 #' numeric ratings.
 #' @return This function returns a vector containing 6 p-values associated with the 6 null values 0,0.1,0.3,0.5,0.7,0.9.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' pval.ICC2r.inter(iccdata1)
 #' @export
 pval.ICC2r.inter <- function(dfra){
   #P-value calculation for Intraclass Correlation Coefficient ICC(2,1) associated with model 2 with interaction
@@ -673,6 +723,11 @@ pval.ICC2r.inter <- function(dfra){
 #' @param rho.zero This is an optional parameter that represents a vector containing an arbitrary number of null values between 0 and 1
 #' for which a p-value will be calculated. If not specified then its default value will be 0.
 #' @return This function returns a vector containing p-values associated with the null values specified in the parameter rho.zero.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' pvals.ICC2r.inter(iccdata1,c(0.15,0.20,0.25))
 #' @export
 pvals.ICC2r.inter <- function(dfra,rho.zero=0){
   #P-value calculation for Intraclass Correlation Coefficient ICC(2,1) associated with model 2 with interaction
@@ -720,6 +775,11 @@ pvals.ICC2r.inter <- function(dfra,rho.zero=0){
 #' @param gam.zero This is an optional parameter that represents a vector containing an arbitrary number of null values between 0 and 1
 #' for which a p-value will be calculated. If not specified then its default value will be 0.
 #' @return This function returns a vector containing p-values associated with the null values specified in the parameter gam.zero.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' pvals.ICC2a.inter(iccdata1,c(0.15,0.20,0.25))
 #' @export
 pvals.ICC2a.inter <- function(dfra,gam.zero=0){
   #P-value calculation for Intraclass Correlation Coefficient ICCa(2,1) associated with model 2 with interaction
@@ -782,6 +842,13 @@ pvals.ICC2a.inter <- function(dfra,gam.zero=0){
 #' 9. min.rep: the minimum number of ratings per subjects.\cr
 #' 10. M: the total number of ratings for all subjects and raters.\cr
 #' 11. ov.mean: the overall mean rating.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' icc2.nointer.fn(iccdata1)
+#' coeff <- icc2.nointer.fn(iccdata1)$icc2r #this only gives you the ICC coefficient
+#' coeff
 #' @export
 icc2.nointer.fn <- function(ratings){
   ratings <- data.frame(lapply(ratings, as.character),stringsAsFactors=FALSE)
@@ -856,6 +923,13 @@ icc2.nointer.fn <- function(ratings){
 #' 8. min.rep: the minimum number of ratings per subjects.\cr
 #' 9. M: the total number of ratings for all subjects and raters.\cr
 #' 10. ov.mean: the overall mean rating.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' icc3.nointer.fn(iccdata1)
+#' coeff <- icc3.nointer.fn(iccdata1)$icc2r #this only gives you the ICC coefficient
+#' coeff
 #' @export
 icc3.nointer.fn <- function(dfra){
   dfra <- data.frame(lapply(dfra, as.character),stringsAsFactors=FALSE)
@@ -981,6 +1055,11 @@ mse2.nointer.fn <- function(dfra){
 #' @param conflev This is the optional confidence level associated with the confidence interval. If not specified, the default value
 #' will be 0.95, which is the most commonly-used valuee in the literature.
 #' @return This function returns a vector containing the lower confidence (lcb) and the upper confidence bound (ucb).
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' ci.ICC2r.nointer(iccdata1)
 #' @export
 ci.ICC2r.nointer <- function(dfra,conflev=0.95){
   dfra <- data.frame(lapply(dfra, as.character),stringsAsFactors=FALSE)
@@ -1034,6 +1113,11 @@ ci.ICC2r.nointer <- function(dfra,conflev=0.95){
 #' @param conflev This is the optional confidence level associated with the confidence interval. If not specified, the default value
 #' will be 0.95, which is the most commonly-used valuee in the literature.
 #' @return This function returns a vector containing the lower confidence (lcb) and the upper confidence bound (ucb).
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' ci.ICC3r.nointer(iccdata1)
 #' @export
 ci.ICC3r.nointer <- function(dfra,conflev=0.95){
   dfra <- data.frame(lapply(dfra, as.character),stringsAsFactors=FALSE)
@@ -1076,6 +1160,12 @@ ci.ICC3r.nointer <- function(dfra,conflev=0.95){
 #' @param rho.zero This is an optional parameter that represents a vector containing an arbitrary number of null values between 0 and 1
 #' for which a p-value will be calculated. If not specified then its default value will be 0.
 #' @return This function returns a vector containing p-values associated with the null values specified in the parameter rho.zero.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' pvals.ICC3r.nointer(iccdata1)
+#' pvals.ICC3r.nointer(iccdata1,seq(0.2,0.5,0.05))
 #' @export
 pvals.ICC3r.nointer <- function(dfra,rho.zero=0){
   #This function produces a vector of p-values associated with the intraclass correlation coefficient ICC(3,1) - i.e. inter-rater reliability -
@@ -1116,6 +1206,12 @@ pvals.ICC3r.nointer <- function(dfra,rho.zero=0){
 #' @param gam.zero This is an optional parameter that represents a vector containing an arbitrary number of null values between 0 and 1
 #' for which a p-value will be calculated. If not specified then its default value will be 0.
 #' @return This function returns a vector containing p-values associated with the null values specified in the parameter rho.zero.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' pvals.ICC3a.inter(iccdata1)
+#' pvals.ICC3a.inter(iccdata1,seq(0.2,0.5,0.05))
 #' @export
 pvals.ICC3a.inter <- function(dfra,gam.zero=0){
   #This function produces a vector of p-values associated with the intraclass correlation coefficient ICCa(3,1) - i.e. intra-rater reliability -
@@ -1161,6 +1257,11 @@ pvals.ICC3a.inter <- function(dfra,gam.zero=0){
 #' @param conflev This is the optional confidence level associated with the confidence interval. If not specified, the default value
 #' will be 0.95, which is the most commonly-used valuee in the literature.
 #' @return This function returns a vector containing the lower confidence (lcb) and the upper confidence bound (ucb).
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' ci.ICC2a.nointer(iccdata1)
 #' @export
 ci.ICC2a.nointer <- function(dfra,conflev=0.95){
   dfra <- data.frame(lapply(dfra, as.character),stringsAsFactors=FALSE)
@@ -1213,6 +1314,12 @@ ci.ICC2a.nointer <- function(dfra,conflev=0.95){
 #' @param rho.zero This is an optional parameter that represents a vector containing an arbitrary number of null values between 0 and 1
 #' for which a p-value will be calculated. If not specified then its default value will be 0.
 #' @return This function returns a vector containing p-values associated with the null values specified in the parameter rho.zero.
+#' @examples
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' pvals.ICC2r.nointer(iccdata1)
+#' pvals.ICC2r.nointer(iccdata1,seq(0.2,0.5,0.05))
 #' @export
 pvals.ICC2r.nointer <- function(dfra,rho.zero=0){
   mse <- mse2.nointer.fn(dfra)
@@ -1250,6 +1357,11 @@ pvals.ICC2r.nointer <- function(dfra,rho.zero=0){
 #' @param gam.zero This is an optional parameter that represents a vector containing an arbitrary number of null values between 0 and 1
 #' for which a p-value will be calculated. If not specified then its default value will be 0.
 #' @return This function returns a vector containing p-values associated with the null values specified in the parameter rho.zero.
+#' #iccdata1 is a small dataset that comes with the package. Use it as follows:
+#' library(irrICC)
+#' iccdata1 #see what the iccdata1 dataset looks like
+#' pvals.ICC2a.nointer(iccdata1)
+#' pvals.ICC2a.nointer(iccdata1,seq(0.2,0.5,0.05))
 #' @export
 pvals.ICC2a.nointer <- function(dfra,gam.zero=0){
   mse <- mse2.nointer.fn(dfra)
