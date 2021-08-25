@@ -1,0 +1,91 @@
+---
+title: "Intraclass Correlation Coefficients (ICC) with the irrICC Package"
+author: "Kilem L. Gwet, Ph.D."
+date: "`r Sys.Date()`"
+output: 
+  pdf_document: default
+  html_document:
+  knitr:::html_vignette:
+vignette: >
+  %\VignetteIndexEntry{irrICC: Calculating Intraclass Correlation Coefficients (ICC)} 
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}    
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(irrICC)
+```
+
+# Abstract
+
+**irrICC** is an R package that provides several functions for calculating various Intraclass Correlation Coefficients (ICC). This package follows closely the general framework of inter-rater and intra-rater reliability presented by Gwet (2014).  
+
+All input datasets to be used with this package must contain a mandatory "Target" column of all subjects that were rated, and 2 or more columns "Rater1", "Rater2", .... showing the ratings assigned to the subjects. The Target variable mus represent the first column of the data frame, and every other column is assumed to contained ratings from a rater. Note that all ratings must be numeric values for the ICC to be calculated. For example, here is a dataset "iccdata1" that is included in this package:
+
+```{r}
+  iccdata1
+```
+The first column "Taget" (the name Target can be replaced with any other name you like) contains subject identifiers, while J1, J2, J3, J4 are the 4 raters (referred to here as Judges) and the ratings they assigned to the subjects. You will notice that the Target column contains duplicates, indicating that some subjects were rated multiple times.  Moreover, none of these judges rated all subjects as seen by the presencce of missing ratings identified with the symbol NA.  
+
+Two other datasets, iccdata2, and iccdata3 come with the package for you to experiment with.  Even if your data frame contains several variuables, note that only the Target and the Rater columns must be supplied as parameters to the functions. For example the iccdata2 data frame contains a variable named Group, which indicates the specific group each Target is categorized. It must be excluded from the input dataset as follows: iccdata2[,2:6].      
+
+&nbsp;
+
+# Computing various ICC values
+
+To determine what function you need, you must first have a statistical description of experimental data.  There are essentially 3 statistical models recommended in the literature for describing quantitative inter-rater reliability data. These are commonly refer to as model 1, model 2 and model 3.   
+
+* **Model 1**  
+Model 1 is uses a single factor (hence the number 1) to explain the variation in the ratings.  When the factor used is the subject then the model is referred to as Model 1A and when it is the rater the model is named Model 1B.  You will want to use Model 1A if not all subjects are rated by the same roster of raters.  That raters may change from subject to subject.  Model 1B is more indicated if different raters may rate different rosters of subjects. Note that while Model 1A only allows for the calculation of inter-rater reliability, Model 1B on the other hand only allows for the calculation of intra-rater reliability.
+
+>Calculating the ICC under Model 1A is done as follows:
+
+```{r}
+  icc1a.fn(iccdata1)
+```
+>It follows that the inter-rater reliability is given by `r round(icc1a.fn(iccdata1)$icc1a,3)`, the first 2 output statistics being the subject variance component `r round(icc1a.fn(iccdata1)$sig2s,3)` and error variance component `r round(icc1a.fn(iccdata1)$sig2e,3)` respectively. You may see a description of the other statistics from the function's documentation. 
+>
+>The ICC under Model 1B is calculated as follows:
+```{r}
+  icc1b.fn(iccdata1)
+```
+>It follows that the intra-rater reliability is given by `r round(icc1b.fn(iccdata1)$icc1b,3)`, the first 2 output statistics being the rater variance component `r round(icc1b.fn(iccdata1)$sig2r,3)` and error variance component `r round(icc1b.fn(iccdata1)$sig2e,3)` respectively. A description of the other statistics can be found in the function's documentation.
+
+* **Model 2**  
+Model 2 includes a subject and a rater factors, both of which are considered random.  That is, Model 2 is a pure random factorial ANOVA model. You may have Model 2 with a subject-rater interaction and Model 2 without subject-rater interaction.  Model 2 with subject-rater interaction is made up of 3 factors: the rater, subject and interaction factors, and is implemented in the function *icc2.inter.fn*.  
+For information, the mathematical formulation of the full Model 2 is $y_{ijk}=\mu+s_i+r_j+(sr)_{ij}+e_{ijk}$, where $y_{ijk}$ is the rating associated with subject $i$, rater $j$ and replicate (or measurement) $k$.  Moreover, $\mu$ is the average rating, $s_i$ subject $i$'s effect, $r_j$ rater $j$'s effect, $(sr)_{ij}$ subject-rater interaction effect associated with subject $i$ and rater $j$, and $e_{ijk}$ is the error effect. The other statistical models are similar to this one. Some may be based on fewer factors or the assumptions applicable to these factors may vary from model to model.  Please read Gwet (2014) for a technical discussion of these models.
+
+>Calculating the ICC from the iccdata1 dataset (included in this package) and under the assumption of Model 2 with interaction is done as follows:
+```{r}
+  icc2.inter.fn(iccdata1)
+```
+>This function produces 2 intraclass correlation coefficients **icc2r** and **icc2a**. While **iccr** represents the inter-rater reliability estimated to be `r round(icc2.inter.fn(iccdata1)$icc2r,3)` , **icc2a** represents the intra-rater reliability estimated at `r round(icc2.inter.fn(iccdata1)$icc2a,3)`. The first 3 output statistics are respectively the the subject, rater, and interaction variance components.  
+
+>The ICC calculation with the iccdata1 dataset and under the assumption of Model 2 without interaction is done as follows:
+```{r}
+  icc2.nointer.fn(iccdata1)
+```
+>The 2 intraclass correlation coefficients have now become *icc2r*=`r round(icc2.nointer.fn(iccdata1)$icc2r,3)` and *icc2a*=`r round(icc2.nointer.fn(iccdata1)$icc2a,3)`. That is the estimated inter-rater reliability slightly went up while the intra-rater reliability coefficient slightly went down.  
+
+* **Model 3**  
+To calcule the ICC using the iccdata1 dataset and under the assumption of Model 3 with interaction, you should proceed as follows:
+```{r}
+  icc3.inter.fn(iccdata1)
+```
+>Here, the 2 intraclass correlation coefficients are given by *icc2r* = `r round(icc3.inter.fn(iccdata1)$icc2r,3)` and *icc2a* = `r round(icc3.inter.fn(iccdata1)$icc2a,3)`. The estimated inter-rater reliability went up substantially while the intra-rater reliability coefficient went down substantially compared to Model 2 with interaction.  
+Assuming Model 3 without interaction, the same coefficients are calculated as follows:
+```{r}
+  icc3.nointer.fn(iccdata1)
+```
+>It follows that the 2 ICCs are given by *icc2r* = `r round(icc3.nointer.fn(iccdata1)$icc2r,3)` and *icc2a* = `r round(icc3.nointer.fn(iccdata1)$icc2a,3)`. As usual, the omission of an interaction factor leads to a slight increase in inter-rater reliability and a slight descrease in intra-rater reliability. In this case, both become identical.
+
+
+# References:
+1. Gwet, K.L. (2014) *Handbook of Inter-Rater Reliability*, 4th Edition. Advanced Analytics, LLC.

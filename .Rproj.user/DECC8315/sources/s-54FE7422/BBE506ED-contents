@@ -1,0 +1,137 @@
+---
+title: "Calculating Confidence Intervals and P-values for Various ICCs"
+author: "Kilem L. Gwet, Ph.D."
+date: "`r Sys.Date()`"
+output:
+  knitr:::html_vignette:
+vignette: >
+  %\VignetteIndexEntry{irrICC: Calculating Confidence Intervals and P-values for Various ICCs}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(irrICC)
+library(scales)
+```
+
+# Abstract
+
+**irrICC** is an R package that provides several functions for calculating various Intraclass Correlation Coefficients (ICC). This package follows closely the general framework of inter-rater and intra-rater reliability presented by Gwet (2014). 
+
+In this document, I like to show you how to obtain the confidence interval and the p-value associated with a particular Intraclass Correlation Coefficient (ICC) your previously obtained. To learn how to obtain the various ICCs implemented in this package, please refer to the [User Guide](UserGuide.pdf). 
+
+Note that the package **scales** is used in this document for formating some numbers. But it not needed to run the **irrICC** package.
+
+#
+# ICC under Model 1A
+
+The following code gives us the inter-rater reliability coefficient of `r round(icc1a.fn(iccdata1)$icc1a,3)`, the associated 95\% confidence interval of (`r round(ci.ICC1a(iccdata1)$lcb,3)`,`r round(ci.ICC1a(iccdata1)$ucb,3)`). As for the p-value, the function *pval.ICC1a()* produces several p-values associated with various values of the null parameters rho.zero given by (0,0.1,0.3,0.5,0.7,0.9). Typically, researchers will calculate the p-value associated with 0 null value to test for statistical significance.  
+You can provide your own null values using the function *pvals.ICC1a()* whose default null value is 0. It's why *pvals.ICC1a(iccdata1)* yields  `r round(pvals.ICC1a(iccdata1),3)`.
+```{r}
+  icc1a.fn(iccdata1)
+  ci.ICC1a(iccdata1)
+  pval.ICC1a(iccdata1)
+  pvals.ICC1a(iccdata1)
+```
+The 95\% confidence level is what is offered by default. Can we obtain a 90\% confidence interval instead? The answer is yes. This is achieved as follows:
+```{r}
+  ci.ICC1a(iccdata1,conflev = 0.90)
+```
+Now, suppose you want to compute p-values based on Model 1A for the null values 0.15,0.25, and 0.45.  You would proceed as follows:
+```{r}
+  pvals.ICC1a(iccdata1,rho.zero = c(0.15,0.25,0.45))
+```
+#
+# ICC under Model 1B
+
+The following code gives us the intra-rater reliability coefficient of `r round(icc1b.fn(iccdata1)$icc1b,3)`, the associated 95\% confidence interval of (`r round(ci.ICC1b(iccdata1)$lcb,3)`,`r round(ci.ICC1b(iccdata1)$ucb,3)`). The function *pval.ICC1b()* gives you p-values for a predermined vector of null values (0.0,0.1,0.3,0.5,0.7,0.9). For example, the p-value associated with the null value 0.3 is given by  `r scientific(pval.ICC1b(iccdata1)$pval[3],digits=4)`. If you want to supply your own null values you will need to use function *pvals.ICC1b()*, the default null value being 0.. Remember that Model 1B can only give you an intra-rater reliability coefficient.  If you need an inter-rater reliability then you must use a different model.
+```{r}
+  icc1b.fn(iccdata1)
+  ci.ICC1b(iccdata1)
+  pval.ICC1b(iccdata1)
+  pvals.ICC1b(iccdata1)
+```
+Again, instead of the default 95\% confidence interval, you may request a 90\% confidence interval as follows:
+```{r}
+  ci.ICC1b(iccdata1,conflev = 0.90)
+```
+P-values associated with an arbitrary vector of null values (0.15,0.25,0.45) are calculated as follows:
+```{r}
+  pvals.ICC1b(iccdata1,gam.zero = c(0.15,0.25,0.45))
+```
+It follows that for the null value 0.25 you get p-value = `r scientific(pvals.ICC1b(iccdata1,gam.zero =0.25)$pval,digits=4)`.
+
+#
+# ICC under Model 2 
+
+### Model 2 With Interaction
+Under Model 2 with interaction, the confidence intervals and p-values are calculated as follows:
+```{r}
+  icc2.inter.fn(iccdata1)
+  ci.ICC2r.inter(iccdata1)
+  ci.ICC2a.inter(iccdata1)
+  pval.ICC2r.inter(iccdata1)
+  pvals.ICC2r.inter(iccdata1)
+  pvals.ICC2a.inter(iccdata1)
+```
+
+* The function *ci.ICC2r.inter(iccdata1)* produced the 95\% confidence interval (`r round(ci.ICC2r.inter(iccdata1)$lcb,3)`,`r round(ci.ICC2r.inter(iccdata1)$ucb,3)`) associated with the inter-rater reliability coefficient ICCr = `r round(icc2.inter.fn(iccdata1)$icc2r,3)`. If needed, change the confidence level to 90\% for example *ci.ICC2r.inter(iccdata1,conflev=0.90)* to get (`r round(ci.ICC2r.inter(iccdata1,conflev=0.90)$lcb,3)`,`r round(ci.ICC2r.inter(iccdata1,conflev=0.90)$ucb,3)`).
+
+* The function *ci.ICC2a.inter(iccdata1)* produced the 95\% confidence interval (`r round(ci.ICC2a.inter(iccdata1)$lcb,3)`,`r round(ci.ICC2a.inter(iccdata1)$ucb,3)`) associated with the intra-rater reliability coefficient ICCa = `r round(icc2.inter.fn(iccdata1)$icc2a,3)`. If needed, change the confidence level to 90\% for example *ci.ICC2a.inter(iccdata1,conflev=0.90)* to get (`r round(ci.ICC2a.inter(iccdata1,conflev=0.90)$lcb,3)`,`r round(ci.ICC2a.inter(iccdata1,conflev=0.90)$ucb,3)`). 
+
+* The function *pval.ICC2r.inter(iccdata1)* produced a series of p-values associated with the **inter-rater** reliability for the 6 arbitrarily selected null values (0,0.1,0.3,0.5,0.7,0.9). 
+
+* The function *pvals.ICC2r.inter(iccdata1)* can produce p-values associated with the **inter-rater** reliability for an arbitrary input vector of null values, the default value being 0. However if you want to compute the p-values for the 2 null values 0.25 and 0.45, it could be achieved as follows:
+```{r}
+  pvals.ICC2r.inter(iccdata1,rho.zero = c(0.25,0.45))
+```
+
+* The function *pvals.ICC2a.inter(iccdata1)* was used to compute the p-value associated with the intra-rater reliability for the default null value of 0. It be used with an arbitrary vector of null values. For the 2 null values 0.25 and 0.45, the associated p-values are computed as follows:
+```{r}
+  pvals.ICC2a.inter(iccdata1,gam.zero = c(0.25,0.45))
+```
+
+
+### Model 2 Without Interaction
+Under Model 2 without interaction, the confidence intervals and p-values are calculated as follows:
+```{r}
+  icc2.nointer.fn(iccdata1)
+  ci.ICC2r.nointer(iccdata1)
+  ci.ICC2a.nointer(iccdata1)
+  pvals.ICC2r.nointer(iccdata1)
+  pvals.ICC2a.nointer(iccdata1)
+```
+
+* All the above procedures work in the same way as those described in the case of Model 2 with interaction.
+
+#
+# ICC under Model 3
+
+Under Model 3 with interaction, the confidence intervals and p-values are calculated as follows:
+```{r}
+  icc3.inter.fn(iccdata1)
+  ci.ICC3r.inter(iccdata1)
+  ci.ICC3a.inter(iccdata1)
+  pvals.ICC3r.inter(iccdata1)
+  pvals.ICC3a.inter(iccdata1)
+```
+
+Under Model 3 without interaction, the confidence intervals and p-values are calculated as follows:
+```{r}
+  icc3.nointer.fn(iccdata1)
+  ci.ICC3r.nointer(iccdata1)
+  pvals.ICC3r.nointer(iccdata1)
+```
+
+* For a more detailed discussion of the use of these functions, please refer to the specific [function description](irrICCfunctions.pdf).
+
+# References:
+1. Gwet, K.L. (2014) *Handbook of Inter-Rater Reliability*, 4th Edition. Advanced Analytics, LLC.

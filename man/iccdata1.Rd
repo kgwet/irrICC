@@ -4,7 +4,8 @@
 \name{iccdata1}
 \alias{iccdata1}
 \title{Scores assigned by 4 judges to 5 targets/subjects.}
-\format{This dataset has 12 rows (for the 5 subjects) and 5 columns. All 5 columns are mandatory when using the ICC functions of
+\format{
+This dataset has 12 rows (for the 5 subjects) and 5 columns. All 5 columns are mandatory when using the ICC functions of
 this package. None of the 4 judges scored all 5 subjects. Judge 4 for example did not score subject 3. Moreover, the subjects
 scored by all judges did not receive the same number of ratings.  Therefore, some missing ratings in the form of "NA" appear
 in the columns associated with the remaining all judges.
@@ -14,7 +15,8 @@ in the columns associated with the remaining all judges.
     \item{J2}{All ratings from judge 2}
     \item{J3}{All ratings from judge 3}
     \item{J4}{All ratings from judge 4}
- }}
+ }
+}
 \source{
 Gwet, K.L. (2014) \emph{Handbook of Inter-Rater Reliability}, 4th Edition. Advanced Analytics, LLC.
 }

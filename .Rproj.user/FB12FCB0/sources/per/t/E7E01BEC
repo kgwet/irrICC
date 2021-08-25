@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1627542206258.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2094631867",
+    "id" : "E7E01BEC",
+    "lastKnownWriteTime" : 1627661281,
+    "last_content_update" : 1627661281525,
+    "path" : "~/Cloud Computing/RpackagesWork/irrICC/R/icc2x3.r",
+    "project_path" : "R/icc2x3.r",
+    "properties" : {
+        "cursorPosition" : "1394,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,18 @@
+rpDir="C:/Users/GWET-ASUS-14/Documents/Cloud Computing/RpackagesWork"
+
+saveRDS(agree.cac,file = paste0(rpDir,"/irrCAC/data/agreeCAC.rds"))
+save(agree.cac3rd,file = paste0(rpDir,"/irrCAC/data/agreeCAC3rd.rds"))
+save(agree.contingency,file = paste0(rpDir,"/irrCAC/data/agreeContingency.rds"))
+save(agree.icc,file = paste0(rpDir,"/irrICC/data/agreeICC.rds"))
+#readRDS(paste0(rpDir,"/irrCAC/data/agreeCAC.rds"))
+
+save(agree.cac,file = paste0(rpDir,"/irrCAC/data/agreeCAC.RData"))
+save(agree.cac3rd,file = paste0(rpDir,"/irrCAC/data/agreeCAC3rd.RData"))
+save(agree.contingency,file = paste0(rpDir,"/irrCAC/data/agreeContingency.RData"))
+save(agree.icc,file = paste0(rpDir,"/irrICC/data/agreeICC.RData"))
+#load(paste0(rpDir,"/irrCAC/data/agreeCAC.RData"))
+#load(paste0(rpDir,"/irrICC/data/agreeICC.RData"))
+
+
+save(iccdata1a,file = paste0(rpDir,"/irrICC/data/iccdata1a.RData"))
+load(paste0(rpDir,"/irrICC/data/iccdata1a.RData"))

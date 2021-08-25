@@ -1,0 +1,26 @@
+{
+    "id": "F49356AE",
+    "path": "~/Cloud Computing/RpackagesWork/irrICC/R/icc1factor.r",
+    "project_path": "R/icc1factor.r",
+    "type": "r_source",
+    "hash": "534176380",
+    "contents": "",
+    "dirty": false,
+    "created": 1627707481333.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "99,13",
+        "scrollLine": "85"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1629911308,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1629911308441,
+    "read_only": false,
+    "read_only_alternatives": []
+}

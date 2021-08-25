@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1627611363436.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1745351689",
+    "id" : "CC6A15A4",
+    "lastKnownWriteTime" : 1627695718,
+    "last_content_update" : 1627695718903,
+    "path" : "~/Cloud Computing/save and read r datasets.r",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "17,41",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

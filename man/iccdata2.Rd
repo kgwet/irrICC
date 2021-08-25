@@ -4,7 +4,8 @@
 \name{iccdata2}
 \alias{iccdata2}
 \title{Scores assigned by 4 judges to 5 targets/subjects distributed in 2 groups A and B.}
-\format{This dataset has 15 rows (for the 5 subjects) and 6 columns. Only the last 5 columns are mandatory when using the ICC functions of
+\format{
+This dataset has 15 rows (for the 5 subjects) and 6 columns. Only the last 5 columns are mandatory when using the ICC functions of
 this package.
  \describe{
     \item{Group}{Group number}
@@ -13,7 +14,8 @@ this package.
     \item{J2}{All ratings from judge 2}
     \item{J3}{All ratings from judge 3}
     \item{J4}{All ratings from judge 4}
- }}
+ }
+}
 \source{
 Gwet, K.L. (2014) \emph{Handbook of Inter-Rater Reliability}, 4th Edition. Advanced Analytics, LLC.
 }

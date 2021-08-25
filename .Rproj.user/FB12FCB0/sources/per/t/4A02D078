@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1627695772830.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1616664115",
+    "id" : "4A02D078",
+    "lastKnownWriteTime" : 1627702880,
+    "last_content_update" : 1627702880240,
+    "path" : "~/Cloud Computing/RpackagesWork/irrICC/R/icc1factor.r",
+    "project_path" : "R/icc1factor.r",
+    "properties" : {
+        "cursorPosition" : "7,19",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

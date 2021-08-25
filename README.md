@@ -1,12 +1,10 @@
     library(irrICC)
 
-Installation
-============
+# Installation
 
 devtools::install\_github(“kgwet/irrICC”)
 
-Abstract
-========
+# Abstract
 
 **irrICC** is an R package that provides several functions for
 calculating various Intraclass Correlation Coefficients (ICC). This
@@ -55,8 +53,7 @@ follows: iccdata2\[,2:6\].
 
  
 
-Computing various ICC values
-============================
+# Computing various ICC values
 
 To determine what function you need, you must first have a statistical
 description of experimental data. There are essentially 3 statistical
@@ -124,10 +121,10 @@ model 2 and model 3.
 > as follows:
 
       icc2.inter.fn(iccdata1)
-    #>      sig2s    sig2r    sig2e    sig2sr    icc2r     icc2a n r max.rep
-    #> 1 2.018593 4.281361 1.315476 0.4067361 0.251627 0.8360198 5 4       3
-    #>   min.rep Mtot ov.mean
-    #> 1       1   40     5.2
+    #>      sig2s    sig2r    sig2e    sig2sr    icc2r     icc2a n r max.rep min.rep
+    #> 1 2.018593 4.281361 1.315476 0.4067361 0.251627 0.8360198 5 4       3       1
+    #>   Mtot ov.mean
+    #> 1   40     5.2
 
 > This function produces 2 intraclass correlation coefficients **icc2r**
 > and **icc2a**. While **iccr** represents the inter-rater reliability
@@ -140,10 +137,8 @@ model 2 and model 3.
 > of Model 2 without interaction is done as follows:
 
       icc2.nointer.fn(iccdata1)
-    #>      sig2s   sig2r    sig2e     icc2r    icc2a n r max.rep min.rep Mtot
-    #> 1 2.090769 4.34898 1.598313 0.2601086 0.801157 5 4       3       1   40
-    #>   ov.mean
-    #> 1     5.2
+    #>      sig2s   sig2r    sig2e     icc2r    icc2a n r max.rep min.rep Mtot ov.mean
+    #> 1 2.090769 4.34898 1.598313 0.2601086 0.801157 5 4       3       1   40     5.2
 
 > The 2 intraclass correlation coefficients have now become *icc2r*=0.26
 > and *icc2a*=0.801. That is the estimated inter-rater reliability
@@ -159,12 +154,12 @@ model 2 and model 3.
 
       icc3.inter.fn(iccdata1)
     #>      sig2s    sig2e    sig2sr     icc2r     icc2a n r max.rep min.rep Mtot
-    #> 1 2.257426 1.315476 0.2238717 0.5749097 0.6535279 5 4       3       1   40
+    #> 1 2.274732 1.315476 0.2007963 0.5823786 0.6530007 5 4       3       1   40
     #>   ov.mean
     #> 1     5.2
 
 > Here, the 2 intraclass correlation coefficients are given by *icc2r* =
-> 0.575 and *icc2a* = 0.654. The estimated inter-rater reliability went
+> 0.582 and *icc2a* = 0.653. The estimated inter-rater reliability went
 > up substantially while the intra-rater reliability coefficient went
 > down substantially compared to Model 2 with interaction.  
 > Assuming Model 3 without interaction, the same coefficients are
@@ -179,8 +174,7 @@ model 2 and model 3.
 > slight increase in inter-rater reliability and a slight descrease in
 > intra-rater reliability. In this case, both become identical.
 
-References:
-===========
+# References:
 
 1.  Gwet, K.L. (2014) *Handbook of Inter-Rater Reliability*, 4th
     Edition. Advanced Analytics, LLC.

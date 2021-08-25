@@ -26,8 +26,10 @@ values specified in the parameter rho.zero.
 #iccdata1 is a small dataset that comes with the package. Use it as follows:
 library(irrICC)
 iccdata1 #see what the iccdata1 dataset looks like
-pvals.ICC3r.inter(iccdata1) #gives you the p-value associated with default null value of 0
-pvals.ICC3r.inter(iccdata1,c(0,0.15,0.25,0.33)) #produces p-values for an arbitrary vector
+pvals.ICC3r.inter(iccdata1) #gives you the p-value associated with default
+#null value of 0
+pvals.ICC3r.inter(iccdata1,c(0,0.15,0.25,0.33)) #produces p-values for an
+#arbitrary vector.
 }
 \references{
 Gwet, K.L. (2014): \emph{Handbook of Inter-Rater Reliability - 4th ed.} chapter 10, section 10.3.3 Advanced Analytics, LLC.

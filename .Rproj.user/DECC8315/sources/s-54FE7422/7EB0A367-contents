@@ -1,0 +1,23 @@
+
+df1<-iccdata2[,2:6]
+df1<-iccdata1
+
+icc2.inter.fn(df1)
+ci.ICC2r.inter(df1)
+pvals.ICC2r.inter(df1,rho.zero = seq(0,0.9,0.1))
+
+ci.ICC2a.inter(df1)
+pvals.ICC2a.inter(df1,gam.zero = seq(0,0.9,0.1))
+
+#--  Model 3 examples
+
+df1 <- iccdata2[,2:6]
+df1 <- iccdata1
+
+icc3.inter.fn(df1)
+ci.ICC3r.inter(df1)
+pvals.ICC3r.inter(df1,rho.zero = seq(0,0.9,0.1))
+
+
+ci.ICC3a.inter(df1)
+pvals.ICC3a.inter(df1,gam.zero = seq(0,0.9,0.1))
