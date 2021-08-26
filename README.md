@@ -176,5 +176,6 @@ model 2 and model 3.
 
 # References:
 
-1.  Gwet, K.L. (2014) *Handbook of Inter-Rater Reliability*, 4th
-    Edition. Advanced Analytics, LLC.
+1.  Gwet, K.L. (2021) *Handbook of Inter-Rater Reliability - Volume 2:
+    Analysis of Quantitative Ratings *, 5th Edition. AgreeStat
+    Analytics.

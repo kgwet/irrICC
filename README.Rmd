@@ -61,7 +61,7 @@ Model 1 is uses a single factor (hence the number 1) to explain the variation in
 
 * **Model 2**  
 Model 2 includes a subject and a rater factors, both of which are considered random.  That is, Model 2 is a pure random factorial ANOVA model. You may have Model 2 with a subject-rater interaction and Model 2 without subject-rater interaction.  Model 2 with subject-rater interaction is made up of 3 factors: the rater, subject and interaction factors, and is implemented in the function *icc2.inter.fn*.  
-For information, the mathematical formulation of the full Model 2 is $y_{ijk}=\mu+s_i+r_j+(sr)_{ij}+e_{ijk}$, where $y_{ijk}$ is the rating associated with subject $i$, rater $j$ and replicate (or measurement) $k$.  Moreover, $\mu$ is the average rating, $s_i$ subject $i$'s effect, $r_j$ rater $j$'s effect, $(sr)_{ij}$ subject-rater interaction effect associated with subject $i$ and rater $j$, and $e_{ijk}$ is the error effect. The other statistical models are similar to this one. Some may be based on fewer factors or the assumptions applicable to these factors may vary from model to model.  Please read Gwet (2014) for a technical discussion of these models.
+For information, the mathematical formulation of the full Model 2 is $y_{ijk}=\mu+s_i+r_j+{(sr)}_{ij}+e_{ijk}$, where $y_{ijk}$ is the rating associated with subject $i$, rater $j$ and replicate (or measurement) $k$.  Moreover, $\mu$ is the average rating, $s_i$ subject $i$'s effect, $r_j$ rater $j$'s effect, $(sr)_{ij}$ subject-rater interaction effect associated with subject $i$ and rater $j$, and $e_{ijk}$ is the error effect. The other statistical models are similar to this one. Some may be based on fewer factors or the assumptions applicable to these factors may vary from model to model.  Please read Gwet (2014) for a technical discussion of these models.
 
 >Calculating the ICC from the iccdata1 dataset (included in this package) and under the assumption of Model 2 with interaction is done as follows:
 ```{r}
@@ -89,4 +89,4 @@ Assuming Model 3 without interaction, the same coefficients are calculated as fo
 
 
 # References:
-1. Gwet, K.L. (2014) *Handbook of Inter-Rater Reliability*, 4th Edition. Advanced Analytics, LLC.
+1. Gwet, K.L. (2021) *Handbook of Inter-Rater Reliability - Volume 2: Analysis of Quantitative Ratings *, 5th Edition. AgreeStat Analytics.
