@@ -104,7 +104,7 @@ model 2 and model 3.
     subject and interaction factors, and is implemented in the function
     *icc2.inter.fn*.  
     For information, the mathematical formulation of the full Model 2 is
-    *y*<sub>*i**j**k*</sub> = *μ* + *s*<sub>*i*</sub> + *r*<sub>*j*</sub> + *s**r*<sub>*i**j*</sub> + *e*<sub>*i**j**k*</sub>,
+    *y*<sub>*i**j**k*</sub> = *μ* + *s*<sub>*i*</sub> + *r*<sub>*j*</sub> + *r*<sub>*i**j*</sub> + *e*<sub>*i**j**k*</sub>,
     where *y*<sub>*i**j**k*</sub> is the rating associated with subject
     *i*, rater *j* and replicate (or measurement) *k*. Moreover, *μ* is
     the average rating, *s*<sub>*i*</sub> subject *i*’s effect,
